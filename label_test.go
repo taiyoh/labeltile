@@ -3,7 +3,7 @@ package labeltile
 import "testing"
 
 func TestLabel(t *testing.T) {
-	l := NewLabel("foo", CategoryID("bar"))
+	l := NewLabel(TenantID("tenant"), "foo", CategoryID("bar"))
 	if l.Key != "foo" {
 		t.Error("label.key should be 'foo'")
 	}

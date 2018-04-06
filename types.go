@@ -11,3 +11,6 @@ type LabelID string
 
 // LangID is alias for identifying lang
 type LangID string
+
+// TenantID is alias for identifying tenant
+type TenantID string

@@ -8,6 +8,7 @@ import (
 // Label manages sentence by lang
 type Label struct {
 	ID        LabelID
+	Tenant    TenantID
 	Key       string
 	Note      string
 	Category  CategoryID
@@ -27,8 +28,9 @@ type langSentence struct {
 }
 
 // NewLabel returns initialized Label object
-func NewLabel(key string, catID CategoryID) *Label {
+func NewLabel(t TenantID, key string, catID CategoryID) *Label {
 	return &Label{
+		Tenant:    t,
 		Key:       key,
 		Category:  catID,
 		Active:    true,
