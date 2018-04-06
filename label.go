@@ -1,6 +1,7 @@
 package labeltile
 
 import (
+	"errors"
 	"time"
 )
 
@@ -31,6 +32,7 @@ func NewLabel(key string, catID CategoryID) *Label {
 		Key:       key,
 		Category:  catID,
 		Active:    true,
+		Sentences: map[LangID]*langSentence{},
 		CreatedAt: time.Now(),
 	}
 }
@@ -56,7 +58,15 @@ func (l *Label) FillLangSentence(ln LangID, s string, u UserID) {
 	}
 }
 
-// VerifyByLang exchange IsVerified flag to true
+// GetSentence returns langSentence object
+func (l *Label) GetSentence(ln LangID) (*langSentence, error) {
+	if s, ok := l.Sentences[ln]; ok {
+		return s, nil
+	}
+	return nil, errors.New("not found")
+}
+
+// VerifyByLang exchange IsVerified flag true, and record verified date and user for specified lang
 func (l *Label) VerifyByLang(ln LangID, u UserID) bool {
 	if ls, exists := l.Sentences[ln]; exists {
 		ls.IsVerified = true
