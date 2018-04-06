@@ -67,12 +67,12 @@ func (l *Label) VerifyByLang(ln LangID, u UserID) bool {
 	return false
 }
 
-// Activate set Active flag to true
+// Activate enables to download label
 func (l *Label) Activate() {
 	l.Active = true
 }
 
-// Deactivate set Active flag to false
+// Deactivate disables to download label
 func (l *Label) Deactivate() {
 	l.Active = false
 }
