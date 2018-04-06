@@ -1,13 +1,13 @@
 package labeltile
 
-// UserID is alias for identifing user
+// UserID is alias for identifying user
 type UserID string
 
-// CategoryID is alias for identifing category
+// CategoryID is alias for identifying category
 type CategoryID string
 
-// LabelID is alias for identifing label
+// LabelID is alias for identifying label
 type LabelID string
 
-// LangID is alias for identifing lang
+// LangID is alias for identifying lang
 type LangID string
