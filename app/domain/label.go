@@ -1,4 +1,4 @@
-package labeltile
+package domain
 
 import (
 	"errors"

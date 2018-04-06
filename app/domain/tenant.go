@@ -1,6 +1,8 @@
-package labeltile
+package domain
 
-import "errors"
+import (
+	"errors"
+)
 
 // Tenant manages langs and categories
 type Tenant struct {
