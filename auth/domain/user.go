@@ -19,6 +19,15 @@ type UserPermission struct {
 	Name string
 }
 
+type UserRepository interface {
+	Find(id UserID) *User
+	Save(u User)
+}
+
+type UserPermissionRepository interface {
+	FindAllByRoles(roles []UserRoleID) []*UserPermission
+}
+
 // NewUser returns initialized user object
 func NewUser(id UserID, role UserRoleID) *User {
 	return &User{
