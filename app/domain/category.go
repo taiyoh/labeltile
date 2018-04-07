@@ -1,4 +1,4 @@
-package labeltile
+package domain
 
 // Category manages label category
 type Category struct {
