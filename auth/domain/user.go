@@ -22,7 +22,7 @@ type UserPermission struct {
 // UserRepository is interface for fetching User aggregation from perpetuation layer
 type UserRepository interface {
 	Find(id UserID) *User
-	Save(u User)
+	Save(u *User)
 }
 
 // UserPermissionRepository is interface for fetching UserPermission aggregation from perpetuation layer
