@@ -3,6 +3,7 @@ package domain
 // User is model for accsessing account
 type User struct {
 	ID    UserID
+	Mail  string
 	Roles []UserRoleID
 }
 
@@ -21,19 +22,22 @@ type UserPermission struct {
 
 // UserRepository is interface for fetching User aggregation from perpetuation layer
 type UserRepository interface {
+	DispenseID() UserID
 	Find(id UserID) *User
 	Save(u *User)
 }
 
 // UserPermissionRepository is interface for fetching UserPermission aggregation from perpetuation layer
 type UserPermissionRepository interface {
+	DispenseID() UserPermissionID
 	FindAllByRoles(roles []UserRoleID) []*UserPermission
 }
 
 // NewUser returns initialized user object
-func NewUser(id UserID, role UserRoleID) *User {
+func NewUser(id UserID, mail string, role UserRoleID) *User {
 	return &User{
 		ID:    id,
+		Mail:  mail,
 		Roles: []UserRoleID{role},
 	}
 }
