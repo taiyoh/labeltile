@@ -1,5 +1,7 @@
 package domain
 
+import "errors"
+
 // User is model for accsessing account
 type User struct {
 	ID    UserID
@@ -31,6 +33,38 @@ type UserRepository interface {
 type UserPermissionRepository interface {
 	DispenseID() UserPermissionID
 	FindAllByRoles(roles []UserRoleID) []*UserPermission
+}
+
+// UserSpecification provides specification and validation for user
+type UserSpecification struct {
+	userRepo       UserRepository
+	permissionRepo UserPermissionRepository
+}
+
+// NewUserSpecification returns UserSpecification object
+func NewUserSpecification(uRepo UserRepository, pRepo UserPermissionRepository) *UserSpecification {
+	return &UserSpecification{
+		userRepo:       uRepo,
+		permissionRepo: pRepo,
+	}
+}
+
+// IsSpecifiedToRegisterUser provides validation for registering user
+func (s *UserSpecification) IsSpecifiedToRegisterUser(mail, role string) error {
+	return s.isValidRole(role)
+}
+
+// IsSpecifiedToEditRole provides vaildation for adding or deleting user's role
+func (s *UserSpecification) IsSpecifiedToEditRole(role string) error {
+	return s.isValidRole(role)
+}
+
+func (s *UserSpecification) isValidRole(role string) error {
+	perms := s.permissionRepo.FindAllByRoles([]UserRoleID{UserRoleID(role)})
+	if len(perms) == 0 {
+		return errors.New("role not registered")
+	}
+	return nil
 }
 
 // NewUser returns initialized user object
