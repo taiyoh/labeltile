@@ -7,33 +7,34 @@ import (
 )
 
 func TestLabel(t *testing.T) {
-	l := domain.NewLabel(domain.TenantID("tenant"), "foo", domain.CategoryID("bar"))
+	l := domain.NewLabel(domain.LabelID("1"), domain.TenantID("tenant"), "foo", domain.CategoryID("bar"))
 	if l.Key != "foo" {
 		t.Error("label.key should be 'foo'")
 	}
-	if string(l.Category) != "bar" {
+	if l.Category.String() != "bar" {
 		t.Error("label.category should be 'bar'")
 	}
-	if !l.Active {
+	if int(l.Status) != int(domain.LabelStatusActive) {
 		t.Error("label.active should be true")
 	}
 	if len(l.Sentences) > 0 {
 		t.Error("label.sentences should be nothing")
 	}
-	l.Deactivate()
-	if l.Active {
+	l = l.Deactivate()
+	if int(l.Status) != int(domain.LabelStatusInactive) {
 		t.Error("deactivate makes Active flag false")
 	}
-	l.Activate()
-	if !l.Active {
+	l = l.Activate()
+	if int(l.Status) != int(domain.LabelStatusActive) {
 		t.Error("activate makes Active flag true")
 	}
 
-	if ok := l.VerifyByLang(domain.LangID("ja"), domain.UserID("1")); ok {
+	var ok bool
+	if l, ok = l.VerifyByLang(domain.LangID("ja"), domain.UserID("1")); ok {
 		t.Error("no sentences exists")
 	}
 
-	l.FillLangSentence(domain.LangID("ja"), "hoge", domain.UserID("1"))
+	l = l.FillLangSentence(domain.LangID("ja"), "hoge", domain.UserID("1"))
 	if len(l.Sentences) != 1 {
 		t.Error("label.sentences should be nothing")
 	}
@@ -47,41 +48,33 @@ func TestLabel(t *testing.T) {
 		t.Error("lang:ja should exists")
 	}
 
-	if s.IsVerified {
+	if s.LastVerified != nil {
 		t.Error("sentence is not verified")
 	}
-	if !s.LastVerifiedAt.IsZero() {
-		t.Error("LastVerifiedAt is not recorded")
-	}
-	if string(s.LastVerifiedUser) != "" {
-		t.Error("LastVerifiedUser is not recorded")
+
+	l, ok = l.VerifyByLang(domain.LangID("ja"), domain.UserID("1"))
+
+	if !ok {
+		t.Error("verify failed")
 	}
 
-	l.VerifyByLang(domain.LangID("ja"), domain.UserID("1"))
-	if !s.IsVerified {
+	s, _ = l.GetSentence(domain.LangID("ja"))
+	if s.LastVerified == nil {
 		t.Error("sentence is verified")
 	}
-	if s.LastVerifiedAt.IsZero() {
+	if s.LastVerified.VerifiedAt.IsZero() {
 		t.Error("LastVerifiedAt is recorded")
 	}
-	if string(s.LastVerifiedUser) == "" {
+	if s.LastVerified.VerifiedUser.String() == "" {
 		t.Error("LastVerifiedUser is recorded")
 	}
 
-	l.FillLangSentence(domain.LangID("ja"), "fuga", domain.UserID("2"))
-	var s2 *domain.LangSentence
-	s2, _ = l.GetSentence(domain.LangID("ja"))
+	l = l.FillLangSentence(domain.LangID("ja"), "fuga", domain.UserID("2"))
+	s2, _ := l.GetSentence(domain.LangID("ja"))
 	if s2.Sentence != "fuga" {
 		t.Error("sentence should be 'fuga'")
 	}
-	if s2.IsVerified {
+	if s2.LastVerified != nil {
 		t.Error("sentence is not verified")
 	}
-	if s2.LastVerifiedAt.Unix() != s.LastVerifiedAt.Unix() {
-		t.Error("LastVerifiedAt is carried old record")
-	}
-	if s2.LastVerifiedUser != s.LastVerifiedUser {
-		t.Error("LastVerifiedUser is carried old record")
-	}
-
 }

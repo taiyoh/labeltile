@@ -14,3 +14,31 @@ type LangID string
 
 // TenantID is alias for identifying tenant
 type TenantID string
+
+// LabelStatus is status for Label
+type LabelStatus int
+
+// String provides exchange UserID to string
+func (i UserID) String() string {
+	return string(i)
+}
+
+// String provides exchange CategoryID to string
+func (i CategoryID) String() string {
+	return string(i)
+}
+
+// String provides exchange LabelID to string
+func (i LabelID) String() string {
+	return string(i)
+}
+
+// String provides exchange LangID to string
+func (i LangID) String() string {
+	return string(i)
+}
+
+// String provides exchange TenantID to string
+func (i TenantID) String() string {
+	return string(i)
+}
