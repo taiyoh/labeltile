@@ -54,7 +54,6 @@ func NewLabel(id LabelID, t TenantID, key string, catID CategoryID) *Label {
 	}
 }
 
-// Copy returns copied LabelSentenceByLang
 func (m labelSentencesByLang) Copy() labelSentencesByLang {
 	ns := labelSentencesByLang{}
 	for k, v := range m {
@@ -63,7 +62,6 @@ func (m labelSentencesByLang) Copy() labelSentencesByLang {
 	return ns
 }
 
-// Fill returns copied LabelSentenceByLang and replacing sentence for specified lang
 func (m labelSentencesByLang) Fill(ln LangID, s string, u UserID) labelSentencesByLang {
 	ns := labelSentencesByLang{}
 	for k, v := range m {
@@ -80,7 +78,6 @@ func (m labelSentencesByLang) Fill(ln LangID, s string, u UserID) labelSentences
 	return ns
 }
 
-// Verify returns copied LabelSentenceByLang and recording verified data
 func (m labelSentencesByLang) Verify(ln LangID, u UserID) (labelSentencesByLang, bool) {
 	ns := labelSentencesByLang{}
 	verified := false
