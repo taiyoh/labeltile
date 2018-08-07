@@ -68,7 +68,7 @@ func (m LabelSentencesByLang) Copy() LabelSentencesByLang {
 func (m LabelSentencesByLang) Fill(ln LangID, s string, u UserID) LabelSentencesByLang {
 	ns := LabelSentencesByLang{}
 	for k, v := range m {
-		if k.String() != ln.String() {
+		if k != ln {
 			ns[k] = v
 		}
 	}
@@ -86,7 +86,7 @@ func (m LabelSentencesByLang) Verify(ln LangID, u UserID) (LabelSentencesByLang,
 	ns := LabelSentencesByLang{}
 	verified := false
 	for k, v := range m {
-		if k.String() == ln.String() {
+		if k == ln {
 			ns[k] = v.Verify(u)
 			verified = true
 		} else {

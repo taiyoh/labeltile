@@ -11,7 +11,7 @@ func TestLabel(t *testing.T) {
 	if l.Key != "foo" {
 		t.Error("label.key should be 'foo'")
 	}
-	if l.Category.String() != "bar" {
+	if l.Category != domain.CategoryID("bar") {
 		t.Error("label.category should be 'bar'")
 	}
 	if int(l.Status) != int(domain.LabelStatusActive) {
@@ -21,11 +21,11 @@ func TestLabel(t *testing.T) {
 		t.Error("label.sentences should be nothing")
 	}
 	l = l.Deactivate()
-	if int(l.Status) != int(domain.LabelStatusInactive) {
+	if l.Status != domain.LabelStatusInactive {
 		t.Error("deactivate makes Active flag false")
 	}
 	l = l.Activate()
-	if int(l.Status) != int(domain.LabelStatusActive) {
+	if l.Status != domain.LabelStatusActive {
 		t.Error("activate makes Active flag true")
 	}
 
@@ -65,7 +65,7 @@ func TestLabel(t *testing.T) {
 	if s.LastVerified.VerifiedAt.IsZero() {
 		t.Error("LastVerifiedAt is recorded")
 	}
-	if s.LastVerified.VerifiedUser.String() == "" {
+	if s.LastVerified.VerifiedUser == domain.UserID("") {
 		t.Error("LastVerifiedUser is recorded")
 	}
 
