@@ -2,11 +2,13 @@ package domain
 
 import "errors"
 
+type userRoles []UserRoleID
+
 // User is model for accsessing account
 type User struct {
 	ID    UserID
-	Mail  string
-	Roles []UserRoleID
+	Mail  UserMail
+	Roles userRoles
 }
 
 // UserRole is relation model for user and permission
@@ -67,27 +69,44 @@ func (s *UserSpecification) isValidRole(role string) error {
 	return nil
 }
 
+func (r userRoles) Add(id UserRoleID) userRoles {
+	nr := r[:]
+	return append(nr, id)
+}
+
+func (r userRoles) Delete(id UserRoleID) userRoles {
+	nr := userRoles{}
+	for _, ro := range r {
+		if ro != id {
+			nr = append(nr, ro)
+		}
+	}
+	return nr
+}
+
 // NewUser returns initialized user object
-func NewUser(id UserID, mail string, role UserRoleID) *User {
+func NewUser(id UserID, mail UserMail, roles []UserRoleID) *User {
 	return &User{
 		ID:    id,
 		Mail:  mail,
-		Roles: []UserRoleID{role},
+		Roles: userRoles(roles),
 	}
 }
 
 // AddRole set role to user
-func (u *User) AddRole(r UserRoleID) {
-	u.Roles = append(u.Roles, r)
+func (u *User) AddRole(r UserRoleID) *User {
+	return &User{
+		ID:    u.ID,
+		Mail:  u.Mail,
+		Roles: u.Roles.Add(r),
+	}
 }
 
 // DeleteRole unset role from user
-func (u *User) DeleteRole(r UserRoleID) {
-	rolelist := []UserRoleID{}
-	for _, ur := range u.Roles {
-		if ur != r {
-			rolelist = append(rolelist, ur)
-		}
+func (u *User) DeleteRole(r UserRoleID) *User {
+	return &User{
+		ID:    u.ID,
+		Mail:  u.Mail,
+		Roles: u.Roles.Delete(r),
 	}
-	u.Roles = rolelist
 }

@@ -8,3 +8,6 @@ type UserPermissionID string
 
 // UserRoleID is alias for identifying user_role
 type UserRoleID string
+
+// UserMail is mailaddress type definition for user
+type UserMail string
