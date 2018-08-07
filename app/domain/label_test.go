@@ -35,12 +35,13 @@ func TestLabel(t *testing.T) {
 	}
 
 	l = l.FillLangSentence(domain.LangID("ja"), "hoge", domain.UserID("1"))
-	if len(l.Sentences) != 1 {
+	l = l.FillLangSentence(domain.LangID("en"), "hoge-en", domain.UserID("1"))
+	if len(l.Sentences) != 2 {
 		t.Error("label.sentences should be nothing")
 	}
 
-	if _, err := l.GetSentence(domain.LangID("en")); err == nil {
-		t.Error("lang:en not registered")
+	if _, err := l.GetSentence(domain.LangID("fr")); err == nil {
+		t.Error("lang:fr not registered")
 	}
 
 	s, err := l.GetSentence(domain.LangID("ja"))

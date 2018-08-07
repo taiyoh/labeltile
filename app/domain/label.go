@@ -54,14 +54,6 @@ func NewLabel(id LabelID, t TenantID, key string, catID CategoryID) *Label {
 	}
 }
 
-func (m labelSentencesByLang) Copy() labelSentencesByLang {
-	ns := labelSentencesByLang{}
-	for k, v := range m {
-		ns[k] = v
-	}
-	return ns
-}
-
 func (m labelSentencesByLang) Fill(ln LangID, s string, u UserID) labelSentencesByLang {
 	ns := labelSentencesByLang{}
 	for k, v := range m {
@@ -154,7 +146,7 @@ func (l *Label) Activate() *Label {
 		Key:       l.Key,
 		Category:  l.Category,
 		Note:      l.Note,
-		Sentences: l.Sentences.Copy(),
+		Sentences: l.Sentences,
 		Status:    LabelStatusActive,
 		CreatedAt: l.CreatedAt,
 	}
@@ -168,7 +160,7 @@ func (l *Label) Deactivate() *Label {
 		Key:       l.Key,
 		Category:  l.Category,
 		Note:      l.Note,
-		Sentences: l.Sentences.Copy(),
+		Sentences: l.Sentences,
 		Status:    LabelStatusInactive,
 		CreatedAt: l.CreatedAt,
 	}
