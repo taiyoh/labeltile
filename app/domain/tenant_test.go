@@ -21,7 +21,7 @@ func TestTenant(t *testing.T) {
 		t.Error("tenant langs is wrong")
 	}
 
-	tenant.AddLanguage(domain.LangID("en"))
+	tenant = tenant.AddLanguage(domain.LangID("en"))
 	if len(tenant.Languages) != 2 {
 		t.Error("lang:en should be added")
 	}
@@ -29,16 +29,16 @@ func TestTenant(t *testing.T) {
 		t.Error("lang:en should be added")
 	}
 
-	if err := tenant.ChangeDefaultLang(domain.LangID("fr")); err == nil {
+	if _, err := tenant.ChangeDefaultLang(domain.LangID("fr")); err == nil {
 		t.Error("lang:fr is not set")
 	}
-	if err := tenant.ChangeDefaultLang(domain.LangID("en")); err != nil {
+	if tenant, _ = tenant.ChangeDefaultLang(domain.LangID("en")); tenant == nil {
 		t.Error("lang:en should be set to default lang")
 	}
 	if tenant.DefaultLang != domain.LangID("en") {
 		t.Error("lang:en should be set to default lang")
 	}
-	tenant.DeleteLanguage(domain.LangID("ja"))
+	tenant = tenant.DeleteLanguage(domain.LangID("ja"))
 	if len(tenant.Languages) != 1 {
 		t.Error("lang:ja should be removed")
 	}
@@ -46,8 +46,8 @@ func TestTenant(t *testing.T) {
 		t.Error("lang:ja should be removed")
 	}
 
-	tenant.AddCategory(domain.CategoryID("p1"))
-	tenant.AddCategory(domain.CategoryID("p2"))
+	tenant = tenant.AddCategory(domain.CategoryID("p1"))
+	tenant = tenant.AddCategory(domain.CategoryID("p2"))
 	if len(tenant.Categories) != 2 {
 		t.Error("category:p1 and category:p2 should be added")
 	}
@@ -57,7 +57,7 @@ func TestTenant(t *testing.T) {
 	if tenant.Categories[1] != domain.CategoryID("p2") {
 		t.Error("category:p2 should be added")
 	}
-	tenant.DeleteCategory(domain.CategoryID("p1"))
+	tenant = tenant.DeleteCategory(domain.CategoryID("p1"))
 	if len(tenant.Categories) != 1 {
 		t.Error("category:p1 should be removed")
 	}
