@@ -1,9 +1,13 @@
-package domain
+package domain_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/taiyoh/labeltile/app/domain"
+)
 
 func TestLabel(t *testing.T) {
-	l := NewLabel(TenantID("tenant"), "foo", CategoryID("bar"))
+	l := domain.NewLabel(domain.TenantID("tenant"), "foo", domain.CategoryID("bar"))
 	if l.Key != "foo" {
 		t.Error("label.key should be 'foo'")
 	}
@@ -25,20 +29,20 @@ func TestLabel(t *testing.T) {
 		t.Error("activate makes Active flag true")
 	}
 
-	if ok := l.VerifyByLang(LangID("ja"), UserID("1")); ok {
+	if ok := l.VerifyByLang(domain.LangID("ja"), domain.UserID("1")); ok {
 		t.Error("no sentences exists")
 	}
 
-	l.FillLangSentence(LangID("ja"), "hoge", UserID("1"))
+	l.FillLangSentence(domain.LangID("ja"), "hoge", domain.UserID("1"))
 	if len(l.Sentences) != 1 {
 		t.Error("label.sentences should be nothing")
 	}
 
-	if _, err := l.GetSentence(LangID("en")); err == nil {
+	if _, err := l.GetSentence(domain.LangID("en")); err == nil {
 		t.Error("lang:en not registered")
 	}
 
-	s, err := l.GetSentence(LangID("ja"))
+	s, err := l.GetSentence(domain.LangID("ja"))
 	if err != nil {
 		t.Error("lang:ja should exists")
 	}
@@ -53,7 +57,7 @@ func TestLabel(t *testing.T) {
 		t.Error("LastVerifiedUser is not recorded")
 	}
 
-	l.VerifyByLang(LangID("ja"), UserID("1"))
+	l.VerifyByLang(domain.LangID("ja"), domain.UserID("1"))
 	if !s.IsVerified {
 		t.Error("sentence is verified")
 	}
@@ -64,9 +68,9 @@ func TestLabel(t *testing.T) {
 		t.Error("LastVerifiedUser is recorded")
 	}
 
-	l.FillLangSentence(LangID("ja"), "fuga", UserID("2"))
-	var s2 *langSentence
-	s2, _ = l.GetSentence(LangID("ja"))
+	l.FillLangSentence(domain.LangID("ja"), "fuga", domain.UserID("2"))
+	var s2 *domain.LangSentence
+	s2, _ = l.GetSentence(domain.LangID("ja"))
 	if s2.Sentence != "fuga" {
 		t.Error("sentence should be 'fuga'")
 	}

@@ -13,11 +13,11 @@ type Label struct {
 	Note      string
 	Category  CategoryID
 	Active    bool
-	Sentences map[LangID]*langSentence
+	Sentences map[LangID]*LangSentence
 	CreatedAt time.Time
 }
 
-type langSentence struct {
+type LangSentence struct {
 	Lang             LangID
 	Sentence         string
 	IsVerified       bool
@@ -34,7 +34,7 @@ func NewLabel(t TenantID, key string, catID CategoryID) *Label {
 		Key:       key,
 		Category:  catID,
 		Active:    true,
-		Sentences: map[LangID]*langSentence{},
+		Sentences: map[LangID]*LangSentence{},
 		CreatedAt: time.Now(),
 	}
 }
@@ -42,7 +42,7 @@ func NewLabel(t TenantID, key string, catID CategoryID) *Label {
 // FillLangSentence stores sentence by lang. IsVerified flag is forced to set false
 func (l *Label) FillLangSentence(ln LangID, s string, u UserID) {
 	if ls, exists := l.Sentences[ln]; exists {
-		l.Sentences[ln] = &langSentence{
+		l.Sentences[ln] = &LangSentence{
 			Lang:             ln,
 			Sentence:         s,
 			LastUpdatedAt:    time.Now(),
@@ -51,7 +51,7 @@ func (l *Label) FillLangSentence(ln LangID, s string, u UserID) {
 			LastVerifiedUser: ls.LastVerifiedUser,
 		}
 	} else {
-		l.Sentences[ln] = &langSentence{
+		l.Sentences[ln] = &LangSentence{
 			Lang:            ln,
 			Sentence:        s,
 			LastUpdatedAt:   time.Now(),
@@ -61,7 +61,7 @@ func (l *Label) FillLangSentence(ln LangID, s string, u UserID) {
 }
 
 // GetSentence returns langSentence object
-func (l *Label) GetSentence(ln LangID) (*langSentence, error) {
+func (l *Label) GetSentence(ln LangID) (*LangSentence, error) {
 	if s, ok := l.Sentences[ln]; ok {
 		return s, nil
 	}
