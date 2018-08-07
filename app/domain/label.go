@@ -12,8 +12,7 @@ const (
 	LabelStatusInactive = LabelStatus(iota)
 )
 
-// LabelSentencesByLang provides hashmap alias for LangSentence
-type LabelSentencesByLang map[LangID]*LangSentence
+type labelSentencesByLang map[LangID]*LangSentence
 
 // SentenceVerified records last verified date and operator
 type SentenceVerified struct {
@@ -38,7 +37,7 @@ type Label struct {
 	Note      string
 	Category  CategoryID
 	Status    LabelStatus
-	Sentences LabelSentencesByLang
+	Sentences labelSentencesByLang
 	CreatedAt time.Time
 }
 
@@ -50,14 +49,14 @@ func NewLabel(id LabelID, t TenantID, key string, catID CategoryID) *Label {
 		Key:       key,
 		Category:  catID,
 		Status:    LabelStatusActive,
-		Sentences: LabelSentencesByLang{},
+		Sentences: labelSentencesByLang{},
 		CreatedAt: time.Now(),
 	}
 }
 
 // Copy returns copied LabelSentenceByLang
-func (m LabelSentencesByLang) Copy() LabelSentencesByLang {
-	ns := LabelSentencesByLang{}
+func (m labelSentencesByLang) Copy() labelSentencesByLang {
+	ns := labelSentencesByLang{}
 	for k, v := range m {
 		ns[k] = v
 	}
@@ -65,8 +64,8 @@ func (m LabelSentencesByLang) Copy() LabelSentencesByLang {
 }
 
 // Fill returns copied LabelSentenceByLang and replacing sentence for specified lang
-func (m LabelSentencesByLang) Fill(ln LangID, s string, u UserID) LabelSentencesByLang {
-	ns := LabelSentencesByLang{}
+func (m labelSentencesByLang) Fill(ln LangID, s string, u UserID) labelSentencesByLang {
+	ns := labelSentencesByLang{}
 	for k, v := range m {
 		if k != ln {
 			ns[k] = v
@@ -82,8 +81,8 @@ func (m LabelSentencesByLang) Fill(ln LangID, s string, u UserID) LabelSentences
 }
 
 // Verify returns copied LabelSentenceByLang and recording verified data
-func (m LabelSentencesByLang) Verify(ln LangID, u UserID) (LabelSentencesByLang, bool) {
-	ns := LabelSentencesByLang{}
+func (m labelSentencesByLang) Verify(ln LangID, u UserID) (labelSentencesByLang, bool) {
+	ns := labelSentencesByLang{}
 	verified := false
 	for k, v := range m {
 		if k == ln {
