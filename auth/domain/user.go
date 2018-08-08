@@ -27,6 +27,7 @@ type UserFactory struct {
 	uRepo UserRepository
 }
 
+// UserSpecification provides validation methods for user registration
 type UserSpecification struct {
 	uRepo UserRepository
 }
@@ -38,6 +39,7 @@ func NewUserFactory(r UserRepository) *UserFactory {
 	}
 }
 
+// NewUserSpecification returns UserSpecification struct
 func NewUserSpecification(r UserRepository) *UserSpecification {
 	return &UserSpecification{
 		uRepo: r,
@@ -54,6 +56,7 @@ func (f *UserFactory) Build(m UserMail) *User {
 	}
 }
 
+// SpecifyUserRegistration returns whether enable to register user or not
 func (s *UserSpecification) SpecifyUserRegistration(addr string) error {
 	e, err := mail.ParseAddress(addr)
 	if err != nil {
