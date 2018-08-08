@@ -72,7 +72,17 @@ func (s *UserSpecification) SpecifyUserRegistration(addr string) error {
 }
 
 func (r userRoles) Add(id RoleID) userRoles {
-	nr := r[:]
+	nr := userRoles{}
+	var roleExists bool
+	for _, ro := range r {
+		if ro == id {
+			roleExists = true
+		}
+		nr = append(nr, ro)
+	}
+	if roleExists {
+		return nr
+	}
 	return append(nr, id)
 }
 

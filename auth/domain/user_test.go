@@ -27,6 +27,11 @@ func TestUser(t *testing.T) {
 	if len(u.Roles) != 2 {
 		t.Error("user roles count should be 2")
 	}
+	u = u.AddRole(domain.RoleViewer)
+	if len(u.Roles) != 2 {
+		t.Error("user roles count should be 2")
+	}
+
 	if u.Roles[1] != domain.RoleEditor {
 		t.Error("user role should be editor")
 	}

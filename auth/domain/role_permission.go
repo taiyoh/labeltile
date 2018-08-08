@@ -1,5 +1,7 @@
 package domain
 
+import "errors"
+
 // Role is relation model for user and permission
 type Role struct {
 	ID          RoleID
@@ -18,6 +20,8 @@ const (
 	RoleViewer = RoleID(iota)
 	// RoleEditor is role for edit data.
 	RoleEditor = RoleID(iota)
+	// RoleManageUser is role for managing users.
+	RoleManageUser = RoleID(iota)
 )
 
 const (
@@ -25,6 +29,8 @@ const (
 	PermissionView = PermissionID(iota)
 	// PermissionEdit is permission for edit labels.
 	PermissionEdit = PermissionID(iota)
+	// PermissionManageUser is permission for managing users.
+	PermissionManageUser = PermissionID(iota)
 )
 
 var (
@@ -39,6 +45,11 @@ func init() {
 	permEdit := &Permission{
 		ID:   PermissionEdit,
 		Name: "edit labels",
+	}
+
+	permMngUser := &Permission{
+		ID:   PermissionManageUser,
+		Name: "manage user",
 	}
 
 	roles[RoleViewer] = &Role{
@@ -56,13 +67,57 @@ func init() {
 			permEdit,
 		},
 	}
+	roles[RoleManageUser] = &Role{
+		ID:   RoleManageUser,
+		Name: "manager",
+		Permissions: []*Permission{
+			permMngUser,
+		},
+	}
 }
 
 // RoleRepository provides interface for fetching Role data
 type RoleRepository struct{}
 
-// Find returns Role which is given by id
-func (r *RoleRepository) Find(id RoleID) *Role {
-	role, _ := roles[id]
-	return role
+// FindMultiByPermission returns Role slices which have given permission
+func (r *RoleRepository) FindMultiByPermission(id PermissionID) []*Role {
+	roleList := []*Role{}
+	for _, role := range roles {
+		for _, p := range role.Permissions {
+			if p.ID == id {
+				roleList = append(roleList, role)
+			}
+		}
+	}
+	return roleList
+}
+
+// RoleSpecification provides validation methods for role modification
+type RoleSpecification struct {
+	rRepo *RoleRepository
+}
+
+// NewRoleSpecification returns RoleSpecification struct
+func NewRoleSpecification(r *RoleRepository) *RoleSpecification {
+	return &RoleSpecification{rRepo: r}
+}
+
+// SpecifyEditRole returns whether operator is editable or not
+func (s *RoleSpecification) SpecifyEditRole(op *User) error {
+	canOperates := map[RoleID]struct{}{}
+	for _, role := range s.rRepo.FindMultiByPermission(PermissionManageUser) {
+		canOperates[role.ID] = struct{}{}
+	}
+	var canOperate bool
+	for _, r := range op.Roles {
+		if _, ok := canOperates[r]; ok {
+			canOperate = true
+			break
+		}
+	}
+	if !canOperate {
+		return errors.New("not permitted")
+	}
+
+	return nil
 }
