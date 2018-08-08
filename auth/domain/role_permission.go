@@ -1,6 +1,9 @@
 package domain
 
-import "errors"
+import (
+	"errors"
+	"strconv"
+)
 
 // Role is relation model for user and permission
 type Role struct {
@@ -103,7 +106,7 @@ func NewRoleSpecification(r *RoleRepository) *RoleSpecification {
 }
 
 // SpecifyEditRole returns whether operator is editable or not
-func (s *RoleSpecification) SpecifyEditRole(op *User) error {
+func (s *RoleSpecification) SpecifyEditRole(op *User, roleIDList []string) error {
 	canOperates := map[RoleID]struct{}{}
 	for _, role := range s.rRepo.FindMultiByPermission(PermissionManageUser) {
 		canOperates[role.ID] = struct{}{}
@@ -117,6 +120,16 @@ func (s *RoleSpecification) SpecifyEditRole(op *User) error {
 	}
 	if !canOperate {
 		return errors.New("not permitted")
+	}
+
+	for _, rid := range roleIDList {
+		if irid, err := strconv.Atoi(rid); err == nil {
+			if _, ok := roles[RoleID(irid)]; !ok {
+				return errors.New("role not found")
+			}
+		} else {
+			return errors.New("role not found")
+		}
 	}
 
 	return nil
