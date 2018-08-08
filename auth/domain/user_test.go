@@ -53,6 +53,10 @@ func TestSpecifyUserRegistration(t *testing.T) {
 		t.Error("invalid address should returns error")
 	}
 
+	if err := s.SpecifyUserRegistration("foo bar baz <foo@example.com>"); err == nil {
+		t.Error("contains somenting other than E-mail address")
+	}
+
 	factory := domain.NewUserFactory(repo)
 	u := factory.Build(domain.UserMail(addr))
 	repo.Save(u)

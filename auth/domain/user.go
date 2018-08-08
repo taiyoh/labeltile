@@ -60,6 +60,10 @@ func (s *UserSpecification) SpecifyUserRegistration(addr string) error {
 		return err
 	}
 
+	if e.Address != addr {
+		return errors.New("conatins something other than E-mail address")
+	}
+
 	u := s.uRepo.FindByMail(e.Address)
 	if u != nil {
 		return errors.New("already registered")
