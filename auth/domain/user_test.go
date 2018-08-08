@@ -8,11 +8,9 @@ import (
 )
 
 func TestUser(t *testing.T) {
-	repo := &mock.UserRepositoryImpl{
-		DispenseIDFunc: func() domain.UserID {
-			return domain.UserID("1")
-		},
-	}
+	repo := mock.LoadUserRepoImpl(func() domain.UserID {
+		return domain.UserID("1")
+	})
 	factory := domain.NewUserFactory(repo)
 	u := factory.Build(domain.UserMail("foo@example.com"))
 	if u.ID != domain.UserID("1") {
@@ -39,5 +37,31 @@ func TestUser(t *testing.T) {
 	}
 	if u.Roles[0] != domain.RoleEditor {
 		t.Error("user role should be only editor")
+	}
+}
+
+func TestSpecifyUserRegistration(t *testing.T) {
+	repo := mock.LoadUserRepoImpl(func() domain.UserID {
+		return domain.UserID("1")
+	})
+
+	s := domain.NewUserSpecification(repo)
+
+	addr := "foo@example.com"
+
+	if err := s.SpecifyUserRegistration("foo bar baz"); err == nil {
+		t.Error("invalid address should returns error")
+	}
+
+	factory := domain.NewUserFactory(repo)
+	u := factory.Build(domain.UserMail(addr))
+	repo.Save(u)
+
+	if err := s.SpecifyUserRegistration(addr); err == nil {
+		t.Error("already registered")
+	}
+
+	if err := s.SpecifyUserRegistration("bar@example.com"); err != nil {
+		t.Error("unregistered address should not returns error")
 	}
 }

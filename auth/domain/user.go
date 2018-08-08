@@ -1,5 +1,10 @@
 package domain
 
+import (
+	"errors"
+	"net/mail"
+)
+
 type userRoles []RoleID
 
 // User is model for accsessing account
@@ -14,6 +19,7 @@ type UserRepository interface {
 	DispenseID() UserID
 	Find(id UserID) *User
 	Save(u *User)
+	FindByMail(m string) *User
 }
 
 // UserFactory is builder for User
@@ -21,9 +27,19 @@ type UserFactory struct {
 	uRepo UserRepository
 }
 
+type UserSpecification struct {
+	uRepo UserRepository
+}
+
 // NewUserFactory returns UserFactory struct
 func NewUserFactory(r UserRepository) *UserFactory {
 	return &UserFactory{
+		uRepo: r,
+	}
+}
+
+func NewUserSpecification(r UserRepository) *UserSpecification {
+	return &UserSpecification{
 		uRepo: r,
 	}
 }
@@ -36,6 +52,19 @@ func (f *UserFactory) Build(m UserMail) *User {
 		Mail:  m,
 		Roles: userRoles{RoleViewer},
 	}
+}
+
+func (s *UserSpecification) SpecifyUserRegistration(addr string) error {
+	e, err := mail.ParseAddress(addr)
+	if err != nil {
+		return err
+	}
+
+	u := s.uRepo.FindByMail(e.Address)
+	if u != nil {
+		return errors.New("already registered")
+	}
+	return nil
 }
 
 func (r userRoles) Add(id RoleID) userRoles {
