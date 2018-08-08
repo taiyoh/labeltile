@@ -8,29 +8,29 @@ import (
 
 // UserService provides application service about user in auth context
 type UserService struct {
-	registry Registry
+	uRepo domain.UserRepository
 }
 
 // NewUserService returns UserService
-func NewUserService(reg Registry) *UserService {
-	return &UserService{registry: reg}
+func NewUserService(repo domain.UserRepository) *UserService {
+	return &UserService{uRepo: repo}
 }
 
 // Register provides user registration application service
-func (s *UserService) Register(mail, role string) error {
-	spec := domain.NewUserSpecification(s.registry.UserRepository(), s.registry.UserPermissionRepository())
-	if err := spec.IsSpecifiedToRegisterUser(mail, role); err != nil {
+func (s *UserService) Register(mail string) error {
+	spec := domain.NewUserSpecification(s.uRepo)
+	if err := spec.SpecifyUserRegistration(mail); err != nil {
 		return err
 	}
-	repo := s.registry.UserRepository()
-	repo.Save(domain.NewUser(repo.DispenseID(), mail, domain.UserRoleID(role)))
+	factory := domain.NewUserFactory(s.uRepo)
+	s.uRepo.Save(factory.Build(domain.UserMail(mail)))
 
 	return nil
 }
 
 // AddRole provides attaching role to user
-func (s *UserService) AddRole(id, role string) error {
-	spec := domain.NewUserSpecification(s.registry.UserRepository(), s.registry.UserPermissionRepository())
+func (s *UserService) AddRole(opid, tgtid, role string) error {
+	spec := domain.NewUserSpecification(s.registry.UserPermissionRepository())
 	if err := spec.IsSpecifiedToEditRole(role); err != nil {
 		return err
 	}
