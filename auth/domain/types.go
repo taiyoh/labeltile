@@ -3,11 +3,11 @@ package domain
 // UserID is alias for identifying user
 type UserID string
 
-// UserPermissionID is alias for identifying user_permission
-type UserPermissionID int
+// PermissionID is alias for identifying permission
+type PermissionID int
 
-// UserRoleID is alias for identifying user_role
-type UserRoleID int
+// RoleID is alias for identifying role
+type RoleID int
 
 // UserMail is mailaddress type definition for user
 type UserMail string

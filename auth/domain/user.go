@@ -1,6 +1,6 @@
 package domain
 
-type userRoles []UserRoleID
+type userRoles []RoleID
 
 // User is model for accsessing account
 type User struct {
@@ -34,16 +34,16 @@ func (f *UserFactory) Build(m UserMail) *User {
 	return &User{
 		ID:    id,
 		Mail:  m,
-		Roles: userRoles{UserRoleViewer},
+		Roles: userRoles{RoleViewer},
 	}
 }
 
-func (r userRoles) Add(id UserRoleID) userRoles {
+func (r userRoles) Add(id RoleID) userRoles {
 	nr := r[:]
 	return append(nr, id)
 }
 
-func (r userRoles) Delete(id UserRoleID) userRoles {
+func (r userRoles) Delete(id RoleID) userRoles {
 	nr := userRoles{}
 	for _, ro := range r {
 		if ro != id {
@@ -54,7 +54,7 @@ func (r userRoles) Delete(id UserRoleID) userRoles {
 }
 
 // AddRole set role to user
-func (u *User) AddRole(r UserRoleID) *User {
+func (u *User) AddRole(r RoleID) *User {
 	return &User{
 		ID:    u.ID,
 		Mail:  u.Mail,
@@ -63,7 +63,7 @@ func (u *User) AddRole(r UserRoleID) *User {
 }
 
 // DeleteRole unset role from user
-func (u *User) DeleteRole(r UserRoleID) *User {
+func (u *User) DeleteRole(r RoleID) *User {
 	return &User{
 		ID:    u.ID,
 		Mail:  u.Mail,

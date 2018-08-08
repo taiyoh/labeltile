@@ -1,66 +1,68 @@
 package domain
 
-// UserRole is relation model for user and permission
-type UserRole struct {
-	ID          UserRoleID
+// Role is relation model for user and permission
+type Role struct {
+	ID          RoleID
 	Name        string
-	Permissions []*UserPermission
+	Permissions []*Permission
 }
 
-// UserPermission is model for permission of user's action
-type UserPermission struct {
-	ID   UserPermissionID
+// Permission is model for permission of user's action
+type Permission struct {
+	ID   PermissionID
 	Name string
 }
 
 const (
-	// UserRoleViewer is role for view only user. unable to edit anything
-	UserRoleViewer = UserRoleID(iota)
-	// UserRoleEditor is role for edit data.
-	UserRoleEditor = UserRoleID(iota)
+	// RoleViewer is role for view only user. unable to edit anything
+	RoleViewer = RoleID(iota)
+	// RoleEditor is role for edit data.
+	RoleEditor = RoleID(iota)
 )
 
 const (
-	// UserPermissionView is permission for view labels.
-	UserPermissionView = UserPermissionID(iota)
-	// UserPermissionEdit is permission for edit labels.
-	UserPermissionEdit = UserPermissionID(iota)
+	// PermissionView is permission for view labels.
+	PermissionView = PermissionID(iota)
+	// PermissionEdit is permission for edit labels.
+	PermissionEdit = PermissionID(iota)
 )
 
 var (
-	roles = map[UserRoleID]*UserRole{}
+	roles = map[RoleID]*Role{}
 )
 
 func init() {
-	permView := &UserPermission{
-		ID:   UserPermissionView,
+	permView := &Permission{
+		ID:   PermissionView,
 		Name: "view labels",
 	}
-	permEdit := &UserPermission{
-		ID:   UserPermissionEdit,
+	permEdit := &Permission{
+		ID:   PermissionEdit,
 		Name: "edit labels",
 	}
 
-	roles[UserRoleViewer] = &UserRole{
-		ID:   UserRoleViewer,
+	roles[RoleViewer] = &Role{
+		ID:   RoleViewer,
 		Name: "viewer",
-		Permissions: []*UserPermission{
+		Permissions: []*Permission{
 			permView,
 		},
 	}
-	roles[UserRoleEditor] = &UserRole{
-		ID:   UserRoleEditor,
+	roles[RoleEditor] = &Role{
+		ID:   RoleEditor,
 		Name: "editor",
-		Permissions: []*UserPermission{
+		Permissions: []*Permission{
 			permView,
 			permEdit,
 		},
 	}
 }
 
-type UserRoleRepository struct{}
+// RoleRepository provides interface for fetching Role data
+type RoleRepository struct{}
 
-func (r *UserRoleRepository) Find(id UserRoleID) *UserRole {
+// Find returns Role which is given by id
+func (r *RoleRepository) Find(id RoleID) *Role {
 	role, _ := roles[id]
 	return role
 }

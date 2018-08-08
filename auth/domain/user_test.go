@@ -21,23 +21,23 @@ func TestUser(t *testing.T) {
 	if len(u.Roles) != 1 {
 		t.Error("user roles count should be 1")
 	}
-	if u.Roles[0] != domain.UserRoleViewer {
+	if u.Roles[0] != domain.RoleViewer {
 		t.Error("user role should be viewer")
 	}
 
-	u = u.AddRole(domain.UserRoleEditor)
+	u = u.AddRole(domain.RoleEditor)
 	if len(u.Roles) != 2 {
 		t.Error("user roles count should be 2")
 	}
-	if u.Roles[1] != domain.UserRoleEditor {
+	if u.Roles[1] != domain.RoleEditor {
 		t.Error("user role should be editor")
 	}
 
-	u = u.DeleteRole(domain.UserRoleViewer)
+	u = u.DeleteRole(domain.RoleViewer)
 	if len(u.Roles) != 1 {
 		t.Error("user roles count should be 1")
 	}
-	if u.Roles[0] != domain.UserRoleEditor {
+	if u.Roles[0] != domain.RoleEditor {
 		t.Error("user role should be only editor")
 	}
 }
