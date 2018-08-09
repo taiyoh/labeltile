@@ -82,6 +82,7 @@ func init() {
 // RoleRepository provides interface for fetching Role data
 type RoleRepository struct{}
 
+// ConvertToID returns RoleID when specified id has given.
 func (r *RoleRepository) ConvertToID(id string) (*RoleID, error) {
 	if irid, err := strconv.Atoi(id); err == nil {
 		rid := RoleID(irid)
@@ -133,9 +134,16 @@ func (s *RoleSpecification) SpecifyEditRole(op *User, roleIDs []RoleID) error {
 		return errors.New("not permitted")
 	}
 
+	for _, rid := range roleIDs {
+		if rid == RoleViewer {
+			return errors.New("cannot edit Viewer Role")
+		}
+	}
+
 	return nil
 }
 
+// SpecifyRegisterUser returns whether operator has Manager role or not.
 func (s *RoleSpecification) SpecifyRegisterUser(op *User) error {
 	return s.SpecifyEditRole(op, []RoleID{RoleManageUser})
 }

@@ -26,8 +26,8 @@ func TestRoleSpecification(t *testing.T) {
 	}
 
 	op = op.AddRole(domain.RoleManageUser)
-	if err := s.SpecifyEditRole(op, []domain.RoleID{domain.RoleID(1111111111)}); err == nil {
-		t.Error("given roles are invalid")
+	if err := s.SpecifyEditRole(op, []domain.RoleID{domain.RoleViewer}); err == nil {
+		t.Error("Viewer role can't edit")
 	}
 	if err := s.SpecifyEditRole(op, []domain.RoleID{domain.RoleEditor}); err != nil {
 		t.Error("operator should have permission and roles should be valid")
