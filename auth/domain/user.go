@@ -17,9 +17,10 @@ type User struct {
 // UserRepository is interface for fetching User aggregation from perpetuation layer
 type UserRepository interface {
 	DispenseID() UserID
-	Find(id UserID) *User
+	Find(id string) *User
 	Save(u *User)
 	FindByMail(m string) *User
+	FindMulti(ids []string) []*User
 }
 
 // UserFactory is builder for User
@@ -40,9 +41,9 @@ func NewUserFactory(r UserRepository) *UserFactory {
 }
 
 // NewUserSpecification returns UserSpecification struct
-func NewUserSpecification(r UserRepository) *UserSpecification {
+func NewUserSpecification(ur UserRepository) *UserSpecification {
 	return &UserSpecification{
-		uRepo: r,
+		uRepo: ur,
 	}
 }
 

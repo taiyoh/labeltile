@@ -23,8 +23,8 @@ func (r *UserRepositoryImpl) DispenseID() domain.UserID {
 }
 
 // Find is implementation for mock
-func (r *UserRepositoryImpl) Find(id domain.UserID) *domain.User {
-	u, _ := r.Users[id]
+func (r *UserRepositoryImpl) Find(id string) *domain.User {
+	u, _ := r.Users[domain.UserID(id)]
 	return u
 }
 
@@ -41,4 +41,16 @@ func (r *UserRepositoryImpl) FindByMail(addr string) *domain.User {
 		}
 	}
 	return nil
+}
+
+func (r *UserRepositoryImpl) FindMulti(ids []string) []*domain.User {
+	users := []*domain.User{}
+	for _, u := range r.Users {
+		for _, id := range ids {
+			if u.ID == domain.UserID(id) {
+				users = append(users, u)
+			}
+		}
+	}
+	return users
 }

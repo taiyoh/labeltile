@@ -1,7 +1,6 @@
 package domain_test
 
 import (
-	"strconv"
 	"testing"
 
 	"github.com/taiyoh/labeltile/auth/domain"
@@ -21,21 +20,16 @@ func TestRoleSpecification(t *testing.T) {
 
 	factory := domain.NewUserFactory(urepo)
 
-	roleEditorID := strconv.Itoa(int(domain.RoleEditor))
-
 	op := factory.Build(domain.UserMail("foo@example.com"))
-	if err := s.SpecifyEditRole(op, []string{roleEditorID}); err == nil {
+	if err := s.SpecifyEditRole(op, []domain.RoleID{domain.RoleEditor}); err == nil {
 		t.Error("not permitted")
 	}
 
 	op = op.AddRole(domain.RoleManageUser)
-	if err := s.SpecifyEditRole(op, []string{"1111111111"}); err == nil {
+	if err := s.SpecifyEditRole(op, []domain.RoleID{domain.RoleID(1111111111)}); err == nil {
 		t.Error("given roles are invalid")
 	}
-	if err := s.SpecifyEditRole(op, []string{"!!!"}); err == nil {
-		t.Error("given roles are invalid")
-	}
-	if err := s.SpecifyEditRole(op, []string{roleEditorID}); err != nil {
+	if err := s.SpecifyEditRole(op, []domain.RoleID{domain.RoleEditor}); err != nil {
 		t.Error("operator should have permission and roles should be valid")
 	}
 }

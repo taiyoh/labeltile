@@ -82,6 +82,17 @@ func init() {
 // RoleRepository provides interface for fetching Role data
 type RoleRepository struct{}
 
+func (r *RoleRepository) ConvertToID(id string) (*RoleID, error) {
+	if irid, err := strconv.Atoi(id); err == nil {
+		rid := RoleID(irid)
+		if _, ok := roles[rid]; !ok {
+			return nil, errors.New("role not found")
+		}
+		return &rid, nil
+	}
+	return nil, errors.New("role not found")
+}
+
 // FindMultiByPermission returns Role slices which have given permission
 func (r *RoleRepository) FindMultiByPermission(id PermissionID) []*Role {
 	roleList := []*Role{}
@@ -106,7 +117,7 @@ func NewRoleSpecification(r *RoleRepository) *RoleSpecification {
 }
 
 // SpecifyEditRole returns whether operator is editable or not
-func (s *RoleSpecification) SpecifyEditRole(op *User, roleIDList []string) error {
+func (s *RoleSpecification) SpecifyEditRole(op *User, roleIDs []RoleID) error {
 	canOperates := map[RoleID]struct{}{}
 	for _, role := range s.rRepo.FindMultiByPermission(PermissionManageUser) {
 		canOperates[role.ID] = struct{}{}
@@ -122,15 +133,9 @@ func (s *RoleSpecification) SpecifyEditRole(op *User, roleIDList []string) error
 		return errors.New("not permitted")
 	}
 
-	for _, rid := range roleIDList {
-		if irid, err := strconv.Atoi(rid); err == nil {
-			if _, ok := roles[RoleID(irid)]; !ok {
-				return errors.New("role not found")
-			}
-		} else {
-			return errors.New("role not found")
-		}
-	}
-
 	return nil
+}
+
+func (s *RoleSpecification) SpecifyRegisterUser(op *User) error {
+	return s.SpecifyEditRole(op, []RoleID{RoleManageUser})
 }
