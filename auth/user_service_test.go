@@ -106,3 +106,46 @@ func TestUserAddAndDeleteRoleService(t *testing.T) {
 	}
 
 }
+
+func TestSelfRoleEdit(t *testing.T) {
+	urepo := mock.LoadUserRepoImpl(func() domain.UserID {
+		return domain.UserID("1")
+	})
+	rrepo := &domain.RoleRepository{}
+
+	f := domain.NewUserFactory(urepo)
+	op := f.Build(domain.UserMail("foo@example.com"))
+	op = op.AddRole(domain.RoleManageUser)
+	urepo.Save(op)
+
+	opID := string(op.ID)
+	roleEditor := strconv.Itoa(int(domain.RoleEditor))
+
+	if err := auth.UserAddRoleService(opID, opID, []string{roleEditor}, urepo, rrepo); err != nil {
+		t.Error("this operation should be valid")
+	}
+
+	op = urepo.Find(opID)
+	if len(op.Roles) != 3 {
+		t.Error("Viewer, Editor, Manager has attached")
+	}
+	if op.Roles[2] != domain.RoleEditor {
+		t.Error("latest attached role is Editor")
+	}
+
+	if err := auth.UserDeleteRoleService(opID, opID, []string{roleEditor}, urepo, rrepo); err != nil {
+		t.Error("this operation should be valid")
+	}
+
+	op = urepo.Find(opID)
+	if len(op.Roles) != 2 {
+		t.Error("Viewer, Manager has attached")
+	}
+
+	if op.Roles[0] != domain.RoleViewer {
+		t.Error("first attached is Viewer")
+	}
+	if op.Roles[1] != domain.RoleManageUser {
+		t.Error("second attached is Manager")
+	}
+}
