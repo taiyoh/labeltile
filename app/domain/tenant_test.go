@@ -4,10 +4,15 @@ import (
 	"testing"
 
 	"github.com/taiyoh/labeltile/app/domain"
+	"github.com/taiyoh/labeltile/app/infra/mock"
 )
 
 func TestTenant(t *testing.T) {
-	tenant := domain.NewTenant(domain.TenantID("1"), "foo", domain.LangID("ja"))
+	trepo := mock.LoadTenantRepoImpl(func() domain.TenantID {
+		return domain.TenantID("1")
+	})
+	factory := domain.NewTenantFactory(trepo)
+	tenant := factory.Build("foo", domain.LangID("ja"))
 	if tenant.Name != "foo" {
 		t.Error("tenant name should be 'foo'")
 	}

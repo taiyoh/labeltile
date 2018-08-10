@@ -53,7 +53,7 @@ type LabelFactory struct {
 	lRepo LabelRepository
 }
 
-// NewLabelFactory returns LabelFactory struct
+// NewLabelFactory returns LabelFactory object
 func NewLabelFactory(r LabelRepository) *LabelFactory {
 	return &LabelFactory{lRepo: r}
 }

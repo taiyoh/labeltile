@@ -56,10 +56,27 @@ type Tenant struct {
 	Categories  tenantCategories
 }
 
-// NewTenant returns initialized Tenant object
-func NewTenant(id TenantID, name string, dl LangID) *Tenant {
+// TenantRepository is interface for Tenant repository
+type TenantRepository interface {
+	DispenseID() TenantID
+	Find(id string) *Tenant
+	Save(t *Tenant)
+}
+
+// TenantFactory provides builder for Tenant
+type TenantFactory struct {
+	tRepo TenantRepository
+}
+
+// NewTenantFactory returns TenantFactory object
+func NewTenantFactory(r TenantRepository) *TenantFactory {
+	return &TenantFactory{tRepo: r}
+}
+
+// Build returns initialized Tenant object
+func (f *TenantFactory) Build(name string, dl LangID) *Tenant {
 	return &Tenant{
-		ID:          id,
+		ID:          f.tRepo.DispenseID(),
 		Name:        name,
 		DefaultLang: dl,
 		Languages:   tenantLanguages{dl},
