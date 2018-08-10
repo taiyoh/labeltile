@@ -14,6 +14,8 @@ const (
 
 type labelSentencesByLang map[LangID]*LangSentence
 
+type labelTags []TagID
+
 // SentenceVerified records last verified date and operator
 type SentenceVerified struct {
 	VerifiedAt   time.Time
@@ -35,7 +37,7 @@ type Label struct {
 	Tenant    TenantID
 	Key       string
 	Note      string
-	Tags      []TagID
+	Tags      labelTags
 	Status    LabelStatus
 	Sentences labelSentencesByLang
 	CreatedAt time.Time
@@ -64,7 +66,7 @@ func (f *LabelFactory) Build(t TenantID, key string) *Label {
 		ID:        f.lRepo.DispenseID(),
 		Tenant:    t,
 		Key:       key,
-		Tags:      []TagID{},
+		Tags:      labelTags{},
 		Status:    LabelStatusActive,
 		Sentences: labelSentencesByLang{},
 		CreatedAt: time.Now(),
@@ -181,5 +183,58 @@ func (l *Label) Deactivate() *Label {
 		Status:    LabelStatusInactive,
 		CreatedAt: l.CreatedAt,
 	}
+}
 
+func (t labelTags) Add(id TagID) labelTags {
+	tags := labelTags{}
+	alreadyFilled := false
+	for _, tid := range t {
+		if tid == id {
+			alreadyFilled = true
+		}
+		tags = append(tags, tid)
+	}
+	if !alreadyFilled {
+		tags = append(tags, id)
+	}
+
+	return tags
+}
+
+func (t labelTags) Delete(id TagID) labelTags {
+	tags := labelTags{}
+	for _, tid := range t {
+		if tid != id {
+			tags = append(tags, tid)
+		}
+	}
+	return tags
+}
+
+// AddTag provides setting TagID in tag list
+func (l *Label) AddTag(id TagID) *Label {
+	return &Label{
+		ID:        l.ID,
+		Tenant:    l.Tenant,
+		Key:       l.Key,
+		Note:      l.Note,
+		Tags:      l.Tags.Add(id),
+		Sentences: l.Sentences,
+		Status:    l.Status,
+		CreatedAt: l.CreatedAt,
+	}
+}
+
+// DeleteTag provides removing TagID in tag list
+func (l *Label) DeleteTag(id TagID) *Label {
+	return &Label{
+		ID:        l.ID,
+		Tenant:    l.Tenant,
+		Key:       l.Key,
+		Note:      l.Note,
+		Tags:      l.Tags.Delete(id),
+		Sentences: l.Sentences,
+		Status:    l.Status,
+		CreatedAt: l.CreatedAt,
+	}
 }

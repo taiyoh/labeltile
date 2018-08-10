@@ -17,7 +17,7 @@ func TestLabel(t *testing.T) {
 	if l.Key != "foo" {
 		t.Error("label.key should be 'foo'")
 	}
-	if int(l.Status) != int(domain.LabelStatusActive) {
+	if l.Status != domain.LabelStatusActive {
 		t.Error("label.active should be true")
 	}
 	if len(l.Sentences) > 0 {
@@ -80,5 +80,18 @@ func TestLabel(t *testing.T) {
 	}
 	if s2.LastVerified != nil {
 		t.Error("sentence is not verified")
+	}
+
+	l = l.AddTag(domain.TagID("1"))
+	l = l.AddTag(domain.TagID("1"))
+	l = l.AddTag(domain.TagID("2"))
+	l = l.AddTag(domain.TagID("3"))
+
+	if len(l.Tags) != 3 {
+		t.Error("tag should be added: ", len(l.Tags))
+	}
+	l = l.DeleteTag(domain.TagID("1"))
+	if len(l.Tags) != 2 {
+		t.Error("tag should be deleted")
 	}
 }
