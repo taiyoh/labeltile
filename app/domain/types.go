@@ -17,3 +17,12 @@ type TenantID string
 
 // LabelStatus is status for Label
 type LabelStatus int
+
+// PermissionID is alias for identifying permission
+type PermissionID int
+
+// RoleID is alias for identifying role
+type RoleID int
+
+// UserMail is mailaddress type definition for user
+type UserMail string

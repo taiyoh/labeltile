@@ -98,3 +98,11 @@ func (t *Tenant) ChangeDefaultLang(l LangID) (*Tenant, error) {
 	}
 	return nil, errors.New("specified lang is not registered")
 }
+
+type TenantSpecification struct {
+	tRepo TenantRepository
+}
+
+func NewTenantSpecification(r TenantRepository) *TenantSpecification {
+	return &TenantSpecification{tRepo: r}
+}
