@@ -30,30 +30,12 @@ func (t tenantLanguages) Exists(l LangID) bool {
 	return false
 }
 
-type tenantCategories []CategoryID
-
-func (t tenantCategories) Append(c CategoryID) tenantCategories {
-	nt := t[:]
-	return append(nt, c)
-}
-
-func (t tenantCategories) Delete(c CategoryID) tenantCategories {
-	cats := tenantCategories{}
-	for _, ca := range t {
-		if ca != c {
-			cats = append(cats, ca)
-		}
-	}
-	return cats
-}
-
 // Tenant manages langs and categories
 type Tenant struct {
 	ID          TenantID
 	Name        string
 	DefaultLang LangID
 	Languages   tenantLanguages
-	Categories  tenantCategories
 }
 
 // TenantRepository is interface for Tenant repository
@@ -80,7 +62,6 @@ func (f *TenantFactory) Build(name string, dl LangID) *Tenant {
 		Name:        name,
 		DefaultLang: dl,
 		Languages:   tenantLanguages{dl},
-		Categories:  tenantCategories{},
 	}
 }
 
@@ -91,7 +72,6 @@ func (t *Tenant) AddLanguage(l LangID) *Tenant {
 		Name:        t.Name,
 		DefaultLang: t.DefaultLang,
 		Languages:   t.Languages.Append(l),
-		Categories:  t.Categories,
 	}
 }
 
@@ -102,7 +82,6 @@ func (t *Tenant) DeleteLanguage(l LangID) *Tenant {
 		Name:        t.Name,
 		DefaultLang: t.DefaultLang,
 		Languages:   t.Languages.Delete(l),
-		Categories:  t.Categories,
 	}
 }
 
@@ -114,31 +93,8 @@ func (t *Tenant) ChangeDefaultLang(l LangID) (*Tenant, error) {
 			Name:        t.Name,
 			DefaultLang: l,
 			Languages:   t.Languages,
-			Categories:  t.Categories,
 		}
 		return nt, nil
 	}
 	return nil, errors.New("specified lang is not registered")
-}
-
-// AddCategory set new category for managing in tenant
-func (t *Tenant) AddCategory(id CategoryID) *Tenant {
-	return &Tenant{
-		ID:          t.ID,
-		Name:        t.Name,
-		DefaultLang: t.DefaultLang,
-		Languages:   t.Languages,
-		Categories:  t.Categories.Append(id),
-	}
-}
-
-// DeleteCategory unset category
-func (t *Tenant) DeleteCategory(id CategoryID) *Tenant {
-	return &Tenant{
-		ID:          t.ID,
-		Name:        t.Name,
-		DefaultLang: t.DefaultLang,
-		Languages:   t.Languages,
-		Categories:  t.Categories.Delete(id),
-	}
 }

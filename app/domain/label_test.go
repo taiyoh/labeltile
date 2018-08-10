@@ -13,12 +13,9 @@ func TestLabel(t *testing.T) {
 	})
 	factory := domain.NewLabelFactory(lrepo)
 
-	l := factory.Build(domain.TenantID("tenant"), "foo", domain.CategoryID("bar"))
+	l := factory.Build(domain.TenantID("tenant"), "foo")
 	if l.Key != "foo" {
 		t.Error("label.key should be 'foo'")
-	}
-	if l.Category != domain.CategoryID("bar") {
-		t.Error("label.category should be 'bar'")
 	}
 	if int(l.Status) != int(domain.LabelStatusActive) {
 		t.Error("label.active should be true")

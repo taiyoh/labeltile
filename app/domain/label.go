@@ -35,7 +35,7 @@ type Label struct {
 	Tenant    TenantID
 	Key       string
 	Note      string
-	Category  CategoryID
+	Tags      []TagID
 	Status    LabelStatus
 	Sentences labelSentencesByLang
 	CreatedAt time.Time
@@ -59,12 +59,12 @@ func NewLabelFactory(r LabelRepository) *LabelFactory {
 }
 
 // Build returns initialized Label object
-func (f *LabelFactory) Build(t TenantID, key string, catID CategoryID) *Label {
+func (f *LabelFactory) Build(t TenantID, key string) *Label {
 	return &Label{
 		ID:        f.lRepo.DispenseID(),
 		Tenant:    t,
 		Key:       key,
-		Category:  catID,
+		Tags:      []TagID{},
 		Status:    LabelStatusActive,
 		Sentences: labelSentencesByLang{},
 		CreatedAt: time.Now(),
@@ -108,8 +108,8 @@ func (l *Label) FillLangSentence(ln LangID, s string, u UserID) *Label {
 		ID:        l.ID,
 		Tenant:    l.Tenant,
 		Key:       l.Key,
-		Category:  l.Category,
 		Note:      l.Note,
+		Tags:      l.Tags,
 		Sentences: l.Sentences.Fill(ln, s, u),
 		Status:    l.Status,
 		CreatedAt: l.CreatedAt,
@@ -145,8 +145,8 @@ func (l *Label) VerifyByLang(ln LangID, u UserID) (*Label, bool) {
 		ID:        l.ID,
 		Tenant:    l.Tenant,
 		Key:       l.Key,
-		Category:  l.Category,
 		Note:      l.Note,
+		Tags:      l.Tags,
 		Sentences: ns,
 		Status:    l.Status,
 		CreatedAt: l.CreatedAt,
@@ -161,8 +161,8 @@ func (l *Label) Activate() *Label {
 		ID:        l.ID,
 		Tenant:    l.Tenant,
 		Key:       l.Key,
-		Category:  l.Category,
 		Note:      l.Note,
+		Tags:      l.Tags,
 		Sentences: l.Sentences,
 		Status:    LabelStatusActive,
 		CreatedAt: l.CreatedAt,
@@ -175,8 +175,8 @@ func (l *Label) Deactivate() *Label {
 		ID:        l.ID,
 		Tenant:    l.Tenant,
 		Key:       l.Key,
-		Category:  l.Category,
 		Note:      l.Note,
+		Tags:      l.Tags,
 		Sentences: l.Sentences,
 		Status:    LabelStatusInactive,
 		CreatedAt: l.CreatedAt,

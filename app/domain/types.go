@@ -3,8 +3,8 @@ package domain
 // UserID is alias for identifying user
 type UserID string
 
-// CategoryID is alias for identifying category
-type CategoryID string
+// TagID is alias for identifying category
+type TagID string
 
 // LabelID is alias for identifying label
 type LabelID string

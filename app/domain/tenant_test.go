@@ -50,23 +50,4 @@ func TestTenant(t *testing.T) {
 	if tenant.Languages[0] != domain.LangID("en") {
 		t.Error("lang:ja should be removed")
 	}
-
-	tenant = tenant.AddCategory(domain.CategoryID("p1"))
-	tenant = tenant.AddCategory(domain.CategoryID("p2"))
-	if len(tenant.Categories) != 2 {
-		t.Error("category:p1 and category:p2 should be added")
-	}
-	if tenant.Categories[0] != domain.CategoryID("p1") {
-		t.Error("category:p1 should be added")
-	}
-	if tenant.Categories[1] != domain.CategoryID("p2") {
-		t.Error("category:p2 should be added")
-	}
-	tenant = tenant.DeleteCategory(domain.CategoryID("p1"))
-	if len(tenant.Categories) != 1 {
-		t.Error("category:p1 should be removed")
-	}
-	if tenant.Categories[0] != domain.CategoryID("p2") {
-		t.Error("category:p2 should be set")
-	}
 }
