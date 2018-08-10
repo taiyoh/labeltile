@@ -117,8 +117,7 @@ func NewRoleSpecification(r *RoleRepository) *RoleSpecification {
 	return &RoleSpecification{rRepo: r}
 }
 
-// SpecifyEditRole returns whether operator is editable or not
-func (s *RoleSpecification) SpecifyEditRole(op *User, roleIDs []RoleID) error {
+func (s *RoleSpecification) specifyEditRole(op *User, roleIDs []RoleID) error {
 	canOperates := map[RoleID]struct{}{}
 	for _, role := range s.rRepo.FindMultiByPermission(PermissionManageUser) {
 		canOperates[role.ID] = struct{}{}
@@ -143,7 +142,47 @@ func (s *RoleSpecification) SpecifyEditRole(op *User, roleIDs []RoleID) error {
 	return nil
 }
 
+// ConvertRoleToID returns RoleID list given from role string list
+func (s *RoleSpecification) ConvertRoleToID(roles []string) ([]RoleID, error) {
+	roleIDs := []RoleID{}
+
+	if len(roles) == 0 {
+		return roleIDs, errors.New("require role list")
+	}
+	for _, r := range roles {
+		if rid, err := s.rRepo.ConvertToID(r); err == nil {
+			roleIDs = append(roleIDs, *rid)
+		}
+	}
+
+	if len(roles) != len(roleIDs) {
+		return roleIDs, errors.New("invalid role exists")
+	}
+
+	return roleIDs, nil
+}
+
+// SpecifyAddRole provides whether operator can add role to target or not
+func (s *RoleSpecification) SpecifyAddRole(op, tgt *User, roleIDs []RoleID) error {
+	return s.specifyEditRole(op, roleIDs)
+}
+
+// SpecifyDeleteRole provides whether operator can delete role from target or not
+func (s *RoleSpecification) SpecifyDeleteRole(op, tgt *User, roleIDs []RoleID) error {
+	if err := s.specifyEditRole(op, roleIDs); err != nil {
+		return err
+	}
+
+	for _, rid := range roleIDs {
+		if rid == RoleManageUser && op.ID == tgt.ID {
+			return errors.New("cannot detach self Manager role")
+		}
+	}
+
+	return nil
+}
+
 // SpecifyRegisterUser returns whether operator has Manager role or not.
 func (s *RoleSpecification) SpecifyRegisterUser(op *User) error {
-	return s.SpecifyEditRole(op, []RoleID{RoleManageUser})
+	return s.specifyEditRole(op, []RoleID{RoleManageUser})
 }
