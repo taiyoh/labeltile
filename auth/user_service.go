@@ -47,30 +47,6 @@ func loadOperatorAndTarget(opid, tgtid string, urepo domain.UserRepository) (*do
 	return op, tgt, nil
 }
 
-func roleEditPreProcess(op *domain.User, roles []string, rrepo *domain.RoleRepository) ([]domain.RoleID, error) {
-	roleIDs := []domain.RoleID{}
-
-	if len(roles) == 0 {
-		return roleIDs, errors.New("require role list")
-	}
-	for _, r := range roles {
-		if rid, err := rrepo.ConvertToID(r); err == nil {
-			roleIDs = append(roleIDs, *rid)
-		}
-	}
-
-	if len(roles) != len(roleIDs) {
-		return roleIDs, errors.New("invalid role exists")
-	}
-
-	spec := domain.NewRoleSpecification(rrepo)
-	if err := spec.SpecifyEditRole(op, roleIDs); err != nil {
-		return roleIDs, err
-	}
-
-	return roleIDs, nil
-}
-
 // UserAddRoleService provides attaching role to user
 func UserAddRoleService(opid, tgtid string, roles []string, urepo domain.UserRepository, rrepo *domain.RoleRepository) error {
 	var op, tgt *domain.User
@@ -82,8 +58,13 @@ func UserAddRoleService(opid, tgtid string, roles []string, urepo domain.UserRep
 		return err
 	}
 
-	roleIDs, err = roleEditPreProcess(op, roles, rrepo)
+	spec := domain.NewRoleSpecification(rrepo)
+
+	roleIDs, err = spec.ConvertRoleToID(roles)
 	if err != nil {
+		return err
+	}
+	if err := spec.SpecifyAddRole(op, tgt, roleIDs); err != nil {
 		return err
 	}
 
@@ -106,8 +87,13 @@ func UserDeleteRoleService(opid, tgtid string, roles []string, urepo domain.User
 		return err
 	}
 
-	roleIDs, err = roleEditPreProcess(op, roles, rrepo)
+	spec := domain.NewRoleSpecification(rrepo)
+
+	roleIDs, err = spec.ConvertRoleToID(roles)
 	if err != nil {
+		return err
+	}
+	if err := spec.SpecifyDeleteRole(op, tgt, roleIDs); err != nil {
 		return err
 	}
 

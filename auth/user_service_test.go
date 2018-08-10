@@ -104,7 +104,6 @@ func TestUserAddAndDeleteRoleService(t *testing.T) {
 	if tgt.Roles[0] != domain.RoleViewer {
 		t.Error("Editor role should be deleted")
 	}
-
 }
 
 func TestSelfRoleEdit(t *testing.T) {
