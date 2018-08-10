@@ -1,12 +1,12 @@
-package auth_test
+package app_test
 
 import (
 	"strconv"
 	"testing"
 
-	"github.com/taiyoh/labeltile/auth"
-	"github.com/taiyoh/labeltile/auth/domain"
-	"github.com/taiyoh/labeltile/auth/infra/mock"
+	"github.com/taiyoh/labeltile/app"
+	"github.com/taiyoh/labeltile/app/domain"
+	"github.com/taiyoh/labeltile/app/infra/mock"
 )
 
 func TestUserRegisterService(t *testing.T) {
@@ -22,18 +22,18 @@ func TestUserRegisterService(t *testing.T) {
 
 	rrepo := &domain.RoleRepository{}
 
-	if err := auth.UserRegisterService(string(op.ID), "target@example.com", urepo, rrepo); err == nil {
+	if err := app.UserRegisterService(string(op.ID), "target@example.com", urepo, rrepo); err == nil {
 		t.Error("operator has no permission")
 	}
 
 	op = op.AddRole(domain.RoleManageUser)
 	urepo.Save(op)
 
-	if err := auth.UserRegisterService(string(op.ID), "foo@example.com", urepo, rrepo); err == nil {
+	if err := app.UserRegisterService(string(op.ID), "foo@example.com", urepo, rrepo); err == nil {
 		t.Error("already registered")
 	}
 
-	if err := auth.UserRegisterService(string(op.ID), "target@example.com", urepo, rrepo); err != nil {
+	if err := app.UserRegisterService(string(op.ID), "target@example.com", urepo, rrepo); err != nil {
 		t.Error("user registration failed")
 	}
 }
@@ -54,34 +54,34 @@ func TestUserAddAndDeleteRoleService(t *testing.T) {
 	opID := string(op.ID)
 	tgtID := string(tgt.ID)
 
-	if err := auth.UserAddRoleService(opID, tgtID, []string{}, urepo, rrepo); err == nil {
+	if err := app.UserAddRoleService(opID, tgtID, []string{}, urepo, rrepo); err == nil {
 		t.Error("operator not found")
 	}
 	urepo.Save(op)
 
-	if err := auth.UserAddRoleService(opID, tgtID, []string{}, urepo, rrepo); err == nil {
+	if err := app.UserAddRoleService(opID, tgtID, []string{}, urepo, rrepo); err == nil {
 		t.Error("target not found")
 	}
 	urepo.Save(tgt)
 
-	if err := auth.UserAddRoleService(opID, tgtID, []string{}, urepo, rrepo); err == nil {
+	if err := app.UserAddRoleService(opID, tgtID, []string{}, urepo, rrepo); err == nil {
 		t.Error("role list required")
 	}
 
-	if err := auth.UserAddRoleService(opID, tgtID, []string{"!!"}, urepo, rrepo); err == nil {
+	if err := app.UserAddRoleService(opID, tgtID, []string{"!!"}, urepo, rrepo); err == nil {
 		t.Error("invalid role exists")
 	}
 
 	roleEditor := strconv.Itoa(int(domain.RoleEditor))
 
-	if err := auth.UserAddRoleService(opID, tgtID, []string{roleEditor}, urepo, rrepo); err == nil {
+	if err := app.UserAddRoleService(opID, tgtID, []string{roleEditor}, urepo, rrepo); err == nil {
 		t.Error("operator has no permission")
 	}
 
 	op = op.AddRole(domain.RoleManageUser)
 	urepo.Save(op)
 
-	if err := auth.UserAddRoleService(opID, tgtID, []string{roleEditor}, urepo, rrepo); err != nil {
+	if err := app.UserAddRoleService(opID, tgtID, []string{roleEditor}, urepo, rrepo); err != nil {
 		t.Error("this operation should be valid")
 	}
 
@@ -93,7 +93,7 @@ func TestUserAddAndDeleteRoleService(t *testing.T) {
 		t.Error("Editor role should be added")
 	}
 
-	if err := auth.UserDeleteRoleService(opID, tgtID, []string{roleEditor}, urepo, rrepo); err != nil {
+	if err := app.UserDeleteRoleService(opID, tgtID, []string{roleEditor}, urepo, rrepo); err != nil {
 		t.Error("this operation should be valid")
 	}
 
@@ -120,7 +120,7 @@ func TestSelfRoleEdit(t *testing.T) {
 	opID := string(op.ID)
 	roleEditor := strconv.Itoa(int(domain.RoleEditor))
 
-	if err := auth.UserAddRoleService(opID, opID, []string{roleEditor}, urepo, rrepo); err != nil {
+	if err := app.UserAddRoleService(opID, opID, []string{roleEditor}, urepo, rrepo); err != nil {
 		t.Error("this operation should be valid")
 	}
 
@@ -132,7 +132,7 @@ func TestSelfRoleEdit(t *testing.T) {
 		t.Error("latest attached role is Editor")
 	}
 
-	if err := auth.UserDeleteRoleService(opID, opID, []string{roleEditor}, urepo, rrepo); err != nil {
+	if err := app.UserDeleteRoleService(opID, opID, []string{roleEditor}, urepo, rrepo); err != nil {
 		t.Error("this operation should be valid")
 	}
 

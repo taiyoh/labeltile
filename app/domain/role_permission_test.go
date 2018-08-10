@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/taiyoh/labeltile/auth/domain"
-	"github.com/taiyoh/labeltile/auth/infra/mock"
+	"github.com/taiyoh/labeltile/app/domain"
+	"github.com/taiyoh/labeltile/app/infra/mock"
 )
 
 func TestConvertRoleToID(t *testing.T) {

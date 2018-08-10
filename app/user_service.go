@@ -1,9 +1,9 @@
-package auth
+package app
 
 import (
 	"errors"
 
-	"github.com/taiyoh/labeltile/auth/domain"
+	"github.com/taiyoh/labeltile/app/domain"
 )
 
 // UserRegisterService provides user registration application service

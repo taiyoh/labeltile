@@ -1,6 +1,6 @@
 package mock
 
-import "github.com/taiyoh/labeltile/auth/domain"
+import "github.com/taiyoh/labeltile/app/domain"
 
 // UserRepositoryImpl provides mock for UserRepository implementation
 type UserRepositoryImpl struct {
