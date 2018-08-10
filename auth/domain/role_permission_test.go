@@ -68,3 +68,34 @@ func TestSpecificationForAddingRole(t *testing.T) {
 		t.Error("operator should have permission and roles should be valid")
 	}
 }
+
+func TestSpecificationForDeletingRole(t *testing.T) {
+	rrepo := &domain.RoleRepository{}
+	userID := 1
+	urepo := mock.LoadUserRepoImpl(func() domain.UserID {
+		suid := string(userID)
+		userID++
+		return domain.UserID(suid)
+	})
+
+	s := domain.NewRoleSpecification(rrepo)
+
+	factory := domain.NewUserFactory(urepo)
+
+	op := factory.Build(domain.UserMail("foo@example.com"))
+	tgt := factory.Build(domain.UserMail("bar@example.com"))
+	if err := s.SpecifyDeleteRole(op, tgt, []domain.RoleID{domain.RoleEditor}); err == nil {
+		t.Error("not permitted")
+	}
+
+	op = op.AddRole(domain.RoleManageUser)
+	if err := s.SpecifyDeleteRole(op, tgt, []domain.RoleID{domain.RoleViewer}); err == nil {
+		t.Error("Viewer role can't edit")
+	}
+	if err := s.SpecifyDeleteRole(op, op, []domain.RoleID{domain.RoleManageUser}); err == nil {
+		t.Error("Can't delete self Manager role")
+	}
+	if err := s.SpecifyDeleteRole(op, tgt, []domain.RoleID{domain.RoleEditor}); err != nil {
+		t.Error("operator should have permission and roles should be valid")
+	}
+}
