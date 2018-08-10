@@ -4,10 +4,16 @@ import (
 	"testing"
 
 	"github.com/taiyoh/labeltile/app/domain"
+	"github.com/taiyoh/labeltile/app/infra/mock"
 )
 
 func TestLabel(t *testing.T) {
-	l := domain.NewLabel(domain.LabelID("1"), domain.TenantID("tenant"), "foo", domain.CategoryID("bar"))
+	lrepo := mock.LoadLabelRepoImpl(func() domain.LabelID {
+		return domain.LabelID("1")
+	})
+	factory := domain.NewLabelFactory(lrepo)
+
+	l := factory.Build(domain.TenantID("tenant"), "foo", domain.CategoryID("bar"))
 	if l.Key != "foo" {
 		t.Error("label.key should be 'foo'")
 	}

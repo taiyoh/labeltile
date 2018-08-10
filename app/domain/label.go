@@ -41,10 +41,27 @@ type Label struct {
 	CreatedAt time.Time
 }
 
-// NewLabel returns initialized Label object
-func NewLabel(id LabelID, t TenantID, key string, catID CategoryID) *Label {
+// LabelRepository is interface for Label repository
+type LabelRepository interface {
+	DispenseID() LabelID
+	Find(id string) *Label
+	Save(l *Label)
+}
+
+// LabelFactory provides builder for Label
+type LabelFactory struct {
+	lRepo LabelRepository
+}
+
+// NewLabelFactory returns LabelFactory struct
+func NewLabelFactory(r LabelRepository) *LabelFactory {
+	return &LabelFactory{lRepo: r}
+}
+
+// Build returns initialized Label object
+func (f *LabelFactory) Build(t TenantID, key string, catID CategoryID) *Label {
 	return &Label{
-		ID:        id,
+		ID:        f.lRepo.DispenseID(),
 		Tenant:    t,
 		Key:       key,
 		Category:  catID,
