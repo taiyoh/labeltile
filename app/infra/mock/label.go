@@ -21,6 +21,15 @@ func (r *LabelRepositoryImpl) Find(id string) *domain.Label {
 	return l
 }
 
+func (r *LabelRepositoryImpl) FindByKey(key string, tenantID domain.TenantID) *domain.Label {
+	for _, label := range r.Labels {
+		if label.Tenant == tenantID && label.Key == key {
+			return label
+		}
+	}
+	return nil
+}
+
 func (r *LabelRepositoryImpl) Save(l *domain.Label) {
 	r.Labels[l.ID] = l
 }

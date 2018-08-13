@@ -47,6 +47,7 @@ type Label struct {
 type LabelRepository interface {
 	DispenseID() LabelID
 	Find(id string) *Label
+	FindByKey(key string, tenantID TenantID) *Label
 	Save(l *Label)
 }
 
@@ -237,4 +238,22 @@ func (l *Label) DeleteTag(id TagID) *Label {
 		Status:    l.Status,
 		CreatedAt: l.CreatedAt,
 	}
+}
+
+// LabelSpecification provides validation for label operation
+type LabelSpecification struct {
+	lRepo LabelRepository
+}
+
+// NewLabelSpecification returns LabelSpecification object
+func NewLabelSpecification(lrepo LabelRepository) *LabelSpecification {
+	return &LabelSpecification{lRepo: lrepo}
+}
+
+// SpecifyAddLabel returns whether given key is already registered or not
+func (s *LabelSpecification) SpecifyAddLabel(tenantID TenantID, key string) error {
+	if label := s.lRepo.FindByKey(key, tenantID); label != nil {
+		return errors.New("label already registered")
+	}
+	return nil
 }

@@ -95,3 +95,22 @@ func TestLabel(t *testing.T) {
 		t.Error("tag should be deleted")
 	}
 }
+
+func TestLabelSpecification(t *testing.T) {
+	lrepo := mock.LoadLabelRepoImpl(func() domain.LabelID {
+		return domain.LabelID("1")
+	})
+	factory := domain.NewLabelFactory(lrepo)
+
+	tenantID := domain.TenantID("1")
+	l := factory.Build(tenantID, "foo")
+	lrepo.Save(l)
+
+	spec := domain.NewLabelSpecification(lrepo)
+	if err := spec.SpecifyAddLabel(tenantID, l.Key); err == nil {
+		t.Error("key:foo already registered")
+	}
+	if err := spec.SpecifyAddLabel(tenantID, "bar"); err != nil {
+		t.Error("ke:bar not registered")
+	}
+}
