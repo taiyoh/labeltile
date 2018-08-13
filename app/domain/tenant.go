@@ -30,11 +30,29 @@ func (t tenantLanguages) Exists(l LangID) bool {
 	return false
 }
 
+type tenantMembers []UserID
+
+func (t tenantMembers) Append(m UserID) tenantMembers {
+	nt := t[:]
+	return append(nt, m)
+}
+
+func (t tenantMembers) Delete(m UserID) tenantMembers {
+	users := tenantMembers{}
+	for _, u := range t {
+		if u != m {
+			users = append(users, u)
+		}
+	}
+	return users
+}
+
 // Tenant manages langs and categories
 type Tenant struct {
 	ID          TenantID
 	Name        string
 	DefaultLang LangID
+	Members     tenantMembers
 	Languages   tenantLanguages
 }
 
@@ -61,6 +79,7 @@ func (f *TenantFactory) Build(name string, dl LangID) *Tenant {
 		ID:          f.tRepo.DispenseID(),
 		Name:        name,
 		DefaultLang: dl,
+		Members:     tenantMembers{},
 		Languages:   tenantLanguages{dl},
 	}
 }
@@ -71,6 +90,7 @@ func (t *Tenant) AddLanguage(l LangID) *Tenant {
 		ID:          t.ID,
 		Name:        t.Name,
 		DefaultLang: t.DefaultLang,
+		Members:     t.Members,
 		Languages:   t.Languages.Append(l),
 	}
 }
@@ -81,6 +101,7 @@ func (t *Tenant) DeleteLanguage(l LangID) *Tenant {
 		ID:          t.ID,
 		Name:        t.Name,
 		DefaultLang: t.DefaultLang,
+		Members:     t.Members,
 		Languages:   t.Languages.Delete(l),
 	}
 }
@@ -92,6 +113,7 @@ func (t *Tenant) ChangeDefaultLang(l LangID) (*Tenant, error) {
 			ID:          t.ID,
 			Name:        t.Name,
 			DefaultLang: l,
+			Members:     t.Members,
 			Languages:   t.Languages,
 		}
 		return nt, nil
@@ -99,10 +121,70 @@ func (t *Tenant) ChangeDefaultLang(l LangID) (*Tenant, error) {
 	return nil, errors.New("specified lang is not registered")
 }
 
-type TenantSpecification struct {
-	tRepo TenantRepository
+// AddMember set new member of tenant
+func (t *Tenant) AddMember(m UserID) *Tenant {
+	return &Tenant{
+		ID:          t.ID,
+		Name:        t.Name,
+		DefaultLang: t.DefaultLang,
+		Members:     t.Members.Append(m),
+		Languages:   t.Languages,
+	}
 }
 
-func NewTenantSpecification(r TenantRepository) *TenantSpecification {
-	return &TenantSpecification{tRepo: r}
+// DeleteMember unset member
+func (t *Tenant) DeleteMember(m UserID) *Tenant {
+	return &Tenant{
+		ID:          t.ID,
+		Name:        t.Name,
+		DefaultLang: t.DefaultLang,
+		Members:     t.Members.Delete(m),
+		Languages:   t.Languages,
+	}
+}
+
+// TenantSpecification provides validation for tenant operation
+type TenantSpecification struct {
+	tRepo TenantRepository
+	uRepo UserRepository
+}
+
+// NewTenantSpecification returns TenantSpecification object
+func NewTenantSpecification(t TenantRepository, u UserRepository) *TenantSpecification {
+	return &TenantSpecification{tRepo: t, uRepo: u}
+}
+
+// SpecifyOperateLabel returns whether given operator can operate by given tenant or not
+func (s *TenantSpecification) SpecifyOperateLabel(tenantid, opID string) error {
+	t := s.tRepo.Find(tenantid)
+	if t == nil {
+		return errors.New("tenant not found")
+	}
+	o := s.uRepo.Find(opID)
+	if o == nil {
+		return errors.New("operator not found")
+	}
+	isMember := false
+	for _, u := range t.Members {
+		if u == o.ID {
+			isMember = true
+			break
+		}
+	}
+	if !isMember {
+		return errors.New("operator is not a member of this tenant")
+	}
+
+	canEdit := false
+	for _, r := range o.Roles {
+		if r == RoleEditor {
+			canEdit = true
+			break
+		}
+	}
+	if !canEdit {
+		return errors.New("operator has no permission")
+	}
+
+	return nil
 }

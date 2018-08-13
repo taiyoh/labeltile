@@ -51,3 +51,53 @@ func TestTenant(t *testing.T) {
 		t.Error("lang:ja should be removed")
 	}
 }
+
+func TestTenantSpecification(t *testing.T) {
+	tid := "1"
+	trepo := mock.LoadTenantRepoImpl(func() domain.TenantID {
+		return domain.TenantID(tid)
+	})
+	tfactory := domain.NewTenantFactory(trepo)
+	tenant := tfactory.Build("foo", domain.LangID("ja"))
+	trepo.Save(tenant)
+	uid := "1"
+	urepo := mock.LoadUserRepoImpl(func() domain.UserID {
+		return domain.UserID(uid)
+	})
+	ufactory := domain.NewUserFactory(urepo)
+	user := ufactory.Build(domain.UserMail("foo@example.com"))
+	urepo.Save(user)
+
+	spec := domain.NewTenantSpecification(trepo, urepo)
+	if err := spec.SpecifyOperateLabel("2", uid); err == nil {
+		t.Error("tenant not found")
+	}
+	if err := spec.SpecifyOperateLabel(tid, "2"); err == nil {
+		t.Error("operator not found")
+	}
+	if err := spec.SpecifyOperateLabel(tid, uid); err == nil {
+		t.Error("operator is not a member of given tenant")
+	}
+
+	tenant = tenant.AddMember(user.ID)
+	trepo.Save(tenant)
+
+	if err := spec.SpecifyOperateLabel(tid, uid); err == nil {
+		t.Error("operator has no permission for edit")
+	}
+
+	user = user.AddRole(domain.RoleEditor)
+	urepo.Save(user)
+
+	if err := spec.SpecifyOperateLabel(tid, uid); err != nil {
+		t.Error("this operation should be valid")
+	}
+
+	tenant = tenant.DeleteMember(user.ID)
+	trepo.Save(tenant)
+
+	if err := spec.SpecifyOperateLabel(tid, uid); err == nil {
+		t.Error("operator has no permission for edit")
+	}
+
+}
