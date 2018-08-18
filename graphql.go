@@ -6,6 +6,8 @@ import (
 	"errors"
 	"io"
 
+	"github.com/taiyoh/labeltile/app/infra"
+
 	"github.com/graphql-go/graphql"
 	"github.com/taiyoh/labeltile/resolver"
 )
@@ -23,7 +25,9 @@ type GraphQL struct {
 }
 
 // NewGraphQLRequest returns Request object with json and token validation
-func NewGraphQLRequest(body io.ReadCloser, userToken string, deserialize UserTokenDeserializerFn) (*GraphQL, error) {
+func NewGraphQLRequest(body io.ReadCloser, userToken string, container interface {
+	UserTokenSerializer() *infra.UserTokenSerializer
+}) (*GraphQL, error) {
 	r := &GraphQL{}
 	if err := json.NewDecoder(body).Decode(r); err != nil {
 		return nil, errors.New("broken request")
@@ -35,7 +39,8 @@ func NewGraphQLRequest(body io.ReadCloser, userToken string, deserialize UserTok
 		return r, nil
 	}
 
-	if claims, err := deserialize(userToken); err == nil {
+	s := container.UserTokenSerializer()
+	if claims, err := s.Deserialize(userToken); err == nil {
 		r.User = &requestUser{
 			ID:         claims["userID"].(string),
 			expireDate: claims["expireDate"].(string),
