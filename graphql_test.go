@@ -20,11 +20,11 @@ func newReader(s string) io.ReadCloser {
 
 func TestBrokenRequest(t *testing.T) {
 	s := loadSerializer()
-	if _, err := labeltile.NewRequest(newReader(`{"foo":[}`), "", s); err == nil {
+	if _, err := labeltile.NewGraphQLRequest(newReader(`{"foo":[}`), "", s); err == nil {
 		t.Error("broken request")
 	}
 
-	if _, err := labeltile.NewRequest(newReader(`{"foo":"bar"}`), "", s); err == nil {
+	if _, err := labeltile.NewGraphQLRequest(newReader(`{"foo":"bar"}`), "", s); err == nil {
 		t.Error("requires query and variables")
 	}
 }
@@ -32,7 +32,7 @@ func TestBrokenRequest(t *testing.T) {
 func TestNewRequestWithoutToken(t *testing.T) {
 	s := loadSerializer()
 	reqStr := `{"variables": {}, "query": "query { operator { id } }"}`
-	req, err := labeltile.NewRequest(newReader(reqStr), "", s)
+	req, err := labeltile.NewGraphQLRequest(newReader(reqStr), "", s)
 	if err != nil {
 		t.Error("error found: " + err.Error())
 	}
@@ -50,12 +50,12 @@ func TestNewRequestWithoutToken(t *testing.T) {
 func TestNewRequestWithToken(t *testing.T) {
 	s := loadSerializer()
 	reqStr := `{"variables": {}, "query": "query { operator { id } }"}`
-	_, err := labeltile.NewRequest(newReader(reqStr), "hoge", s)
+	_, err := labeltile.NewGraphQLRequest(newReader(reqStr), "hoge", s)
 	if err == nil {
 		t.Error("user token is wrong")
 	}
 	token, _ := s.Serialize(map[string]interface{}{"userID": "nya-"})
-	req, err := labeltile.NewRequest(newReader(reqStr), token, s)
+	req, err := labeltile.NewGraphQLRequest(newReader(reqStr), token, s)
 	if err != nil || req.User == nil {
 		t.Error("user token is valid")
 	}
