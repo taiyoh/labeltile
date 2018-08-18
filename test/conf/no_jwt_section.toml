@@ -1,0 +1,5 @@
+foo="bar"
+
+[server]
+port=3000
+template="/foo/bar"

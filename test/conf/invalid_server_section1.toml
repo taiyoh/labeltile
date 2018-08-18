@@ -1,0 +1,7 @@
+[jwt]
+secret_key="foobar"
+expire_hour=1
+signing_method="HS512"
+
+[server]
+port=-1

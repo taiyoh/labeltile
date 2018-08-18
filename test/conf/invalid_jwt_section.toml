@@ -1,0 +1,7 @@
+[jwt]
+secret_key=""
+expire_hour=-1
+
+[server]
+port=3000
+template="/foo/bar"
