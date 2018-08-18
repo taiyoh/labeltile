@@ -7,7 +7,6 @@ import (
 	"io"
 
 	"github.com/graphql-go/graphql"
-	"github.com/taiyoh/labeltile/app/infra"
 	"github.com/taiyoh/labeltile/resolver"
 )
 
@@ -24,7 +23,7 @@ type GraphQL struct {
 }
 
 // NewGraphQLRequest returns Request object with json and token validation
-func NewGraphQLRequest(body io.ReadCloser, userToken string, s *infra.UserTokenSerializer) (*GraphQL, error) {
+func NewGraphQLRequest(body io.ReadCloser, userToken string, deserialize UserTokenDeserializerFn) (*GraphQL, error) {
 	r := &GraphQL{}
 	if err := json.NewDecoder(body).Decode(r); err != nil {
 		return nil, errors.New("broken request")
@@ -36,7 +35,7 @@ func NewGraphQLRequest(body io.ReadCloser, userToken string, s *infra.UserTokenS
 		return r, nil
 	}
 
-	if claims, err := s.Deserialize(userToken); err == nil {
+	if claims, err := deserialize(userToken); err == nil {
 		r.User = &requestUser{
 			ID:         claims["userID"].(string),
 			expireDate: claims["expireDate"].(string),
@@ -48,6 +47,7 @@ func NewGraphQLRequest(body io.ReadCloser, userToken string, s *infra.UserTokenS
 }
 
 func (g *GraphQL) Run(ctx context.Context) interface{} {
+	ctx = context.WithValue(ctx, resolver.CtxKey("requestUser"), g.User)
 	r := graphql.Do(graphql.Params{
 		Schema:         schema,
 		RequestString:  g.Query,
@@ -63,9 +63,7 @@ var (
 
 func init() {
 	resolver.InitializeTypes()
-	/*
-		schema, _ = graphql.NewSchema(graphql.SchemaConfig{
-			Query: resolver.GetType(resolver.GQLType("RootQuery")),
-		})
-	*/
+	schema, _ = graphql.NewSchema(graphql.SchemaConfig{
+		Query: resolver.GetType(resolver.GQLType("RootQuery")),
+	})
 }
