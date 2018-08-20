@@ -6,10 +6,12 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/taiyoh/labeltile/app"
 )
 
 // UserTokenSerializer provides JWT based token serialization and deserialization
 type UserTokenSerializer struct {
+	app.UserTokenSerializer
 	signingMethod string
 	expireHour    uint32
 	secretKey     string
