@@ -10,36 +10,26 @@ import (
 )
 
 func TestLabelAddService(t *testing.T) {
-	uid := "1"
-	urepo := mock.LoadUserRepoImpl(func() domain.UserID {
-		return domain.UserID(uid)
-	})
-	ufactory := domain.NewUserFactory(urepo)
+	c := mock.LoadContainerImpl()
+	ufactory := domain.NewUserFactory(c.UserRepository())
 	user := ufactory.Build(domain.UserMail("foo@example.com"))
 	user = user.AddRole(domain.RoleEditor)
-	urepo.Save(user)
+	c.UserRepository().Save(user)
+	uid := string(user.ID)
 
-	tid := "1"
-	trepo := mock.LoadTenantRepoImpl(func() domain.TenantID {
-		return domain.TenantID(tid)
-	})
-	tfactory := domain.NewTenantFactory(trepo)
+	tfactory := domain.NewTenantFactory(c.TenantRepository())
 	tenant := tfactory.Build("foo", domain.LangID("ja"))
 	tenant = tenant.AddMember(user.ID)
-	trepo.Save(tenant)
+	c.TenantRepository().Save(tenant)
+	tid := string(tenant.ID)
 
-	lid := "1"
-	lrepo := mock.LoadLabelRepoImpl(func() domain.LabelID {
-		return domain.LabelID(lid)
-	})
-
-	if err := app.LabelAddService(uid, "2", "foo", urepo, lrepo, trepo); err == nil {
+	if err := app.LabelAddService(uid, "2", "foo", c); err == nil {
 		t.Error("tenant not found")
 	}
-	if err := app.LabelAddService(uid, tid, "foo", urepo, lrepo, trepo); err != nil {
+	if err := app.LabelAddService(uid, tid, "foo", c); err != nil {
 		t.Error("operation is valid")
 	}
-	if err := app.LabelAddService(uid, tid, "foo", urepo, lrepo, trepo); err == nil {
+	if err := app.LabelAddService(uid, tid, "foo", c); err == nil {
 		t.Error("label:foo already registered")
 	}
 

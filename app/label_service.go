@@ -5,18 +5,22 @@ import (
 )
 
 // LabelAddService provides registering label and validation
-func LabelAddService(opID, tenantID, key string, urepo domain.UserRepository, lrepo domain.LabelRepository, trepo domain.TenantRepository) error {
-	tspec := domain.NewTenantSpecification(trepo, urepo)
+func LabelAddService(opID, tenantID, key string, container interface {
+	UserRepository() domain.UserRepository
+	LabelRepository() domain.LabelRepository
+	TenantRepository() domain.TenantRepository
+}) error {
+	tspec := domain.NewTenantSpecification(container.TenantRepository(), container.UserRepository())
 	if err := tspec.SpecifyOperateLabel(tenantID, opID); err != nil {
 		return err
 	}
 	tID := domain.TenantID(tenantID)
-	lspec := domain.NewLabelSpecification(lrepo)
+	lspec := domain.NewLabelSpecification(container.LabelRepository())
 	if err := lspec.SpecifyAddLabel(tID, key); err != nil {
 		return err
 	}
-	factory := domain.NewLabelFactory(lrepo)
+	factory := domain.NewLabelFactory(container.LabelRepository())
 	label := factory.Build(tID, key)
-	lrepo.Save(label)
+	container.LabelRepository().Save(label)
 	return nil
 }

@@ -53,3 +53,11 @@ func (c *ContainerImpl) RoleRepository() *domain.RoleRepository {
 func (c *ContainerImpl) UserRepository() domain.UserRepository {
 	return c.userRepo
 }
+
+func (c *ContainerImpl) TenantRepository() domain.TenantRepository {
+	return c.tenantRepo
+}
+
+func (c *ContainerImpl) LabelRepository() domain.LabelRepository {
+	return c.labelRepo
+}
