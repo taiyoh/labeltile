@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "cloud.google.com/go"
+  packages = ["compute/metadata"]
+  revision = "64a2037ec6be8a4b0c1d1f706ed35b428b989239"
+  version = "v0.26.0"
+
+[[projects]]
   name = "github.com/BurntSushi/toml"
   packages = ["."]
   revision = "b26d9c308763d68093482582cea63d69be07a0f0"
@@ -21,12 +27,7 @@
 
 [[projects]]
   name = "github.com/gin-gonic/gin"
-  packages = [
-    ".",
-    "binding",
-    "json",
-    "render"
-  ]
+  packages = [".","binding","json","render"]
   revision = "b869fe1415e4b9eb52f247441830d502aece2d4d"
   version = "v1.3.0"
 
@@ -37,19 +38,7 @@
 
 [[projects]]
   name = "github.com/graphql-go/graphql"
-  packages = [
-    ".",
-    "gqlerrors",
-    "language/ast",
-    "language/kinds",
-    "language/lexer",
-    "language/location",
-    "language/parser",
-    "language/printer",
-    "language/source",
-    "language/typeInfo",
-    "language/visitor"
-  ]
+  packages = [".","gqlerrors","language/ast","language/kinds","language/lexer","language/location","language/parser","language/printer","language/source","language/typeInfo","language/visitor"]
   revision = "1e23489041ba90a66f317fe0deccb236a2fff3cb"
   version = "v0.7.5"
 
@@ -71,9 +60,27 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context","context/ctxhttp"]
+  revision = "aaf60122140d3fcf75376d319f0554393160eb50"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
+  packages = [".","google","internal","jws","jwt"]
+  revision = "3d292e4d0cdc3a0113e6d207bb137145ef1de42f"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
   revision = "4e1fef5609515ec7a2cee7b5de30ba6d9b438cbf"
+
+[[projects]]
+  name = "google.golang.org/appengine"
+  packages = [".","internal","internal/app_identity","internal/base","internal/datastore","internal/log","internal/modules","internal/remote_api","internal/urlfetch","urlfetch"]
+  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
+  version = "v1.1.0"
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v8"
@@ -89,6 +96,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "eaf07864af7cc1bff857eeee4eec59c129fa0440a703ae45afccebca82580415"
+  inputs-digest = "0b083431e3138482575a0614f583cc82874df7609788ecd641051e36d496b9d4"
   solver-name = "gps-cdcl"
   solver-version = 1
