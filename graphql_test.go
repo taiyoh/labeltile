@@ -19,22 +19,20 @@ func newReader(s string) io.ReadCloser {
 }
 
 func TestBrokenRequest(t *testing.T) {
-	c := infra.NewContainer()
-	c.SetUserTokenSerializer(loadSerializer())
-	if _, err := labeltile.NewGraphQLRequest(newReader(`{"foo":[}`), "", c); err == nil {
+	s := loadSerializer()
+	if _, err := labeltile.NewGraphQLRequest(newReader(`{"foo":[}`), "", s); err == nil {
 		t.Error("broken request")
 	}
 
-	if _, err := labeltile.NewGraphQLRequest(newReader(`{"foo":"bar"}`), "", c); err == nil {
+	if _, err := labeltile.NewGraphQLRequest(newReader(`{"foo":"bar"}`), "", s); err == nil {
 		t.Error("requires query and variables")
 	}
 }
 
 func TestNewRequestWithoutToken(t *testing.T) {
-	c := infra.NewContainer()
-	c.SetUserTokenSerializer(loadSerializer())
+	s := loadSerializer()
 	reqStr := `{"variables": {}, "query": "query { operator { id } }"}`
-	req, err := labeltile.NewGraphQLRequest(newReader(reqStr), "", c)
+	req, err := labeltile.NewGraphQLRequest(newReader(reqStr), "", s)
 	if err != nil {
 		t.Error("error found: " + err.Error())
 	}
@@ -50,15 +48,14 @@ func TestNewRequestWithoutToken(t *testing.T) {
 }
 
 func TestNewRequestWithToken(t *testing.T) {
-	c := infra.NewContainer()
-	c.SetUserTokenSerializer(loadSerializer())
+	s := loadSerializer()
 	reqStr := `{"variables": {}, "query": "query { operator { id } }"}`
-	_, err := labeltile.NewGraphQLRequest(newReader(reqStr), "hoge", c)
+	_, err := labeltile.NewGraphQLRequest(newReader(reqStr), "hoge", s)
 	if err == nil {
 		t.Error("user token is wrong")
 	}
-	token, _ := c.UserTokenSerializer().Serialize(map[string]interface{}{"userID": "nya-"})
-	req, err := labeltile.NewGraphQLRequest(newReader(reqStr), token, c)
+	token, _ := s.Serialize(map[string]interface{}{"userID": "nya-"})
+	req, err := labeltile.NewGraphQLRequest(newReader(reqStr), token, s)
 	if err != nil || req.User == nil {
 		t.Error("user token is valid")
 	}
