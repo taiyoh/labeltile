@@ -7,9 +7,6 @@ import (
 // GQLType is registered GraphQL object type
 type GQLType string
 
-// CtxKey is access key for context.Context
-type CtxKey string
-
 var types map[GQLType]*graphql.Object
 
 // GetType returns GraphQL object which is registered
