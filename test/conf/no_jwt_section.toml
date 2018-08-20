@@ -3,3 +3,8 @@ foo="bar"
 [server]
 port=3000
 template="/foo/bar"
+
+[oauth2.google]
+client_id="foo"
+client_secret="bar"
+redirect_url="https://example.com/auth/google/callback"

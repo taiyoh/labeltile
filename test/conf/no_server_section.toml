@@ -4,3 +4,8 @@ foo="bar"
 signing_method="HS512"
 secret_key="hoge"
 expire_hour=24
+
+[oauth2.google]
+client_id="foo"
+client_secret="bar"
+redirect_url="https://example.com/auth/google/callback"

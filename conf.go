@@ -2,6 +2,7 @@ package labeltile
 
 import (
 	"errors"
+	"net/url"
 	"os"
 
 	"github.com/BurntSushi/toml"
@@ -39,10 +40,36 @@ func (c ServerConf) IsValid() bool {
 	return true
 }
 
+// OAuth2GoogleConf provides configuration for google oauth2
+type OAuth2GoogleConf struct {
+	ClientID     string `toml:"client_id"`
+	ClientSecret string `toml:"client_secret"`
+	RedirectURL  string `toml:"redirect_url"`
+}
+
+// IsValid returns whether OAuth2GoogleConf data structure is valid or not
+func (c OAuth2GoogleConf) IsValid() bool {
+	if c.ClientID == "" || c.ClientSecret == "" {
+		return false
+	}
+	if u, err := url.Parse(c.RedirectURL); err != nil {
+		return false
+	} else if u.Scheme == "http" || u.Scheme == "https" {
+		return true
+	}
+	return false
+}
+
+// OAuth2Conf provides oauth2 conf section
+type OAuth2Conf struct {
+	Google OAuth2GoogleConf `toml:"google"`
+}
+
 // Conf is configuration binder
 type Conf struct {
-	Server ServerConf
-	JWT    JWTConf
+	Server ServerConf `toml:"server"`
+	JWT    JWTConf    `toml:"jwt"`
+	OAuth2 OAuth2Conf `toml:"oauth2"`
 }
 
 // NewConf returns Conf object with validation
@@ -57,6 +84,9 @@ func NewConf(path string) (*Conf, error) {
 	}
 	if !labeltileConf.Server.IsValid() {
 		return nil, errors.New("invalid Server section")
+	}
+	if !labeltileConf.OAuth2.Google.IsValid() {
+		return nil, errors.New("invalid OAuth2.Google section")
 	}
 
 	return labeltileConf, nil

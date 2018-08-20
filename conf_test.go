@@ -34,6 +34,12 @@ func TestInvalidConf(t *testing.T) {
 	if _, err := labeltile.NewConf(filepath.Join(d, "invalid_server_section2.toml")); err == nil {
 		t.Error("invalid template path")
 	}
+	if _, err := labeltile.NewConf(filepath.Join(d, "invalid_oauth2google_section1.toml")); err == nil {
+		t.Error("requires client_id and client_secret")
+	}
+	if _, err := labeltile.NewConf(filepath.Join(d, "invalid_oauth2google_section2.toml")); err == nil {
+		t.Error("invalid redirect_url")
+	}
 }
 
 func TestValidConf(t *testing.T) {
@@ -53,6 +59,11 @@ template="{{.template}}"
 secret_key="foobar"
 signing_method="HS512"
 expire_hour=1
+
+[oauth2.google]
+client_id="foo"
+client_secret="bar"
+redirect_url="https://example.com/auth/google/callback"
 
 `
 

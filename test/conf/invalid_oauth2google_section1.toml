@@ -1,13 +1,13 @@
 [jwt]
+signing_method="HS512"
 secret_key="foobar"
 expire_hour=1
-signing_method="HS512"
 
 [server]
 port=3000
 template="/foo/bar"
 
 [oauth2.google]
-client_id="foo"
-client_secret="bar"
+client_id=""
+client_secret=""
 redirect_url="https://example.com/auth/google/callback"
