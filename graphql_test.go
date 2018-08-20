@@ -57,9 +57,9 @@ func TestNewRequestWithToken(t *testing.T) {
 	token, _ := s.Serialize(map[string]interface{}{"userID": "nya-"})
 	req, err := labeltile.NewGraphQLRequest(newReader(reqStr), token, s)
 	if err != nil || req.User == nil {
-		t.Error("user token is valid")
+		t.Error("user token is valid:", err)
 	}
-	if req.User.ID != "nya-" {
+	if req.User.ID() != "nya-" {
 		t.Error("userID is wrong")
 	}
 }

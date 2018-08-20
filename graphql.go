@@ -5,22 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"strconv"
 
 	"github.com/graphql-go/graphql"
 	"github.com/taiyoh/labeltile/app"
 	"github.com/taiyoh/labeltile/resolver"
 )
 
-type requestUser struct {
-	ID         string
-	expireDate string
-}
-
 // GraphQL provides variable, query and user grouping per request for GraphQL execution
 type GraphQL struct {
 	Variables map[string]interface{}
 	Query     string
-	User      *requestUser
+	User      app.RequestUser
 }
 
 // NewGraphQLRequest returns Request object with json and token validation
@@ -37,18 +33,19 @@ func NewGraphQLRequest(body io.ReadCloser, userToken string, serializer app.User
 	}
 
 	if claims, err := serializer.Deserialize(userToken); err == nil {
-		r.User = &requestUser{
-			ID:         claims["userID"].(string),
-			expireDate: claims["expireDate"].(string),
-		}
+		userID := claims["userID"].(string)
+		expDate := claims["expireDate"].(string)
+		ed, _ := strconv.ParseInt(expDate, 10, 64)
+		r.User = app.NewRequestUser(userID, ed)
 		return r, nil
 	}
 
 	return nil, errors.New("broken user token")
 }
 
-func (g *GraphQL) Run(ctx context.Context) interface{} {
-	ctx = context.WithValue(ctx, resolver.RequestUserCtxKey, g.User)
+func (g *GraphQL) Run(container app.Container, ctx context.Context) interface{} {
+	ctx = context.WithValue(ctx, app.RequestUserCtxKey, g.User)
+	ctx = context.WithValue(ctx, app.ContainerCtxKey, container)
 	r := graphql.Do(graphql.Params{
 		Schema:         schema,
 		RequestString:  g.Query,

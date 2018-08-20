@@ -14,3 +14,13 @@ type UserTokenSerializer interface {
 type OAuth2Google interface {
 	AuthCodeURL(state string) string
 }
+
+// CtxKey is access key for context.Context
+type CtxKey string
+
+var (
+	// RequestUserCtxKey is access key for requestUser in context
+	RequestUserCtxKey = CtxKey("requestUser")
+	// ContainerCtxKey is access key for container in context
+	ContainerCtxKey = CtxKey("container")
+)
