@@ -107,6 +107,17 @@ func (r *RoleRepository) FindMultiByPermission(id PermissionID) []*Role {
 	return roleList
 }
 
+func (r *RoleRepository) FindAll(ids []RoleID) []*Role {
+	roleList := []*Role{}
+	for _, id := range ids {
+		if role, exists := roles[id]; exists {
+			roleList = append(roleList, role)
+		}
+	}
+	return roleList
+
+}
+
 // RoleSpecification provides validation methods for role modification
 type RoleSpecification struct {
 	rRepo *RoleRepository

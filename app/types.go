@@ -1,8 +1,12 @@
 package app
 
+import "github.com/taiyoh/labeltile/app/domain"
+
 type Container interface {
 	UserTokenSerializer() UserTokenSerializer
 	OAuth2Google() OAuth2Google
+	UsepRepository() domain.UserRepository
+	RoleRepository() *domain.RoleRepository
 }
 
 type UserTokenSerializer interface {
@@ -24,3 +28,9 @@ var (
 	// ContainerCtxKey is access key for container in context
 	ContainerCtxKey = CtxKey("container")
 )
+
+type UserDTO struct {
+	ID    string   `json:"id"`
+	Mail  string   `json:"mail"`
+	Roles []string `json:"roles"`
+}

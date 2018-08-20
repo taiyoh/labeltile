@@ -7,9 +7,13 @@ import (
 )
 
 // UserRegisterService provides user registration application service
-func UserRegisterService(opid, mail string, urepo domain.UserRepository, rrepo *domain.RoleRepository) error {
-	uspec := domain.NewUserSpecification(urepo)
-	rspec := domain.NewRoleSpecification(rrepo)
+func UserRegisterService(opid, mail string, container interface {
+	UserRepository() domain.UserRepository
+	RoleRepository() *domain.RoleRepository
+}) error {
+	uspec := domain.NewUserSpecification(container.UserRepository())
+	rspec := domain.NewRoleSpecification(container.RoleRepository())
+	urepo := container.UserRepository()
 	op := urepo.Find(opid)
 	if op == nil {
 		return errors.New("operator not found")
@@ -48,17 +52,20 @@ func loadOperatorAndTarget(opid, tgtid string, urepo domain.UserRepository) (*do
 }
 
 // UserAddRoleService provides attaching role to user
-func UserAddRoleService(opid, tgtid string, roles []string, urepo domain.UserRepository, rrepo *domain.RoleRepository) error {
+func UserAddRoleService(opid, tgtid string, roles []string, container interface {
+	UserRepository() domain.UserRepository
+	RoleRepository() *domain.RoleRepository
+}) error {
 	var op, tgt *domain.User
 	var roleIDs []domain.RoleID
 	var err error
 
-	op, tgt, err = loadOperatorAndTarget(opid, tgtid, urepo)
+	op, tgt, err = loadOperatorAndTarget(opid, tgtid, container.UserRepository())
 	if err != nil {
 		return err
 	}
 
-	spec := domain.NewRoleSpecification(rrepo)
+	spec := domain.NewRoleSpecification(container.RoleRepository())
 
 	roleIDs, err = spec.ConvertRoleToID(roles)
 	if err != nil {
@@ -71,23 +78,26 @@ func UserAddRoleService(opid, tgtid string, roles []string, urepo domain.UserRep
 	for _, rid := range roleIDs {
 		tgt = tgt.AddRole(rid)
 	}
-	urepo.Save(tgt)
+	container.UserRepository().Save(tgt)
 
 	return nil
 }
 
 // UserDeleteRoleService provides detaching role from user
-func UserDeleteRoleService(opid, tgtid string, roles []string, urepo domain.UserRepository, rrepo *domain.RoleRepository) error {
+func UserDeleteRoleService(opid, tgtid string, roles []string, container interface {
+	UserRepository() domain.UserRepository
+	RoleRepository() *domain.RoleRepository
+}) error {
 	var op, tgt *domain.User
 	var roleIDs []domain.RoleID
 	var err error
 
-	op, tgt, err = loadOperatorAndTarget(opid, tgtid, urepo)
+	op, tgt, err = loadOperatorAndTarget(opid, tgtid, container.UserRepository())
 	if err != nil {
 		return err
 	}
 
-	spec := domain.NewRoleSpecification(rrepo)
+	spec := domain.NewRoleSpecification(container.RoleRepository())
 
 	roleIDs, err = spec.ConvertRoleToID(roles)
 	if err != nil {
@@ -100,7 +110,27 @@ func UserDeleteRoleService(opid, tgtid string, roles []string, urepo domain.User
 	for _, rid := range roleIDs {
 		tgt = tgt.DeleteRole(rid)
 	}
-	urepo.Save(tgt)
+	container.UserRepository().Save(tgt)
 
 	return nil
+}
+
+// UserFindService provides retrieving user data using given id
+func UserFindService(id string, container interface {
+	UserRepository() domain.UserRepository
+	RoleRepository() *domain.RoleRepository
+}) *UserDTO {
+	u := container.UserRepository().Find(id)
+	if u == nil {
+		return nil
+	}
+	roles := []string{}
+	for _, role := range container.RoleRepository().FindAll(u.Roles) {
+		roles = append(roles, role.Name)
+	}
+	return &UserDTO{
+		ID:    string(u.ID),
+		Mail:  string(u.Mail),
+		Roles: roles,
+	}
 }
