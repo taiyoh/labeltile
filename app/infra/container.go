@@ -12,10 +12,13 @@ type Container struct {
 	userRepository   domain.UserRepository
 	labelRepository  domain.LabelRepository
 	tenantRepository domain.TenantRepository
+	roleRepository   *domain.RoleRepository
 }
 
 func NewContainer() *Container {
-	return &Container{}
+	return &Container{
+		roleRepository: &domain.RoleRepository{},
+	}
 }
 
 func (c *Container) SetUserTokenSerializer(s app.UserTokenSerializer) {
@@ -28,4 +31,12 @@ func (c *Container) UserTokenSerializer() app.UserTokenSerializer {
 
 func (c *Container) OAuth2Google() app.OAuth2Google {
 	return c.oauth2Google
+}
+
+func (c *Container) UserRepository() domain.UserRepository {
+	return c.userRepository
+}
+
+func (c *Container) RoleRepository() *domain.RoleRepository {
+	return c.roleRepository
 }

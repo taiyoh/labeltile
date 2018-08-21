@@ -6,7 +6,7 @@ import "github.com/taiyoh/labeltile/app/domain"
 type Container interface {
 	UserTokenSerializer() UserTokenSerializer
 	OAuth2Google() OAuth2Google
-	UsepRepository() domain.UserRepository
+	UserRepository() domain.UserRepository
 	RoleRepository() *domain.RoleRepository
 }
 
@@ -26,8 +26,8 @@ type OAuth2Google interface {
 type CtxKey string
 
 var (
-	// RequestUserCtxKey is access key for requestUser in context
-	RequestUserCtxKey = CtxKey("requestUser")
+	// UserIDCtxKey is access key for requestUser in context
+	UserIDCtxKey = CtxKey("userID")
 	// ContainerCtxKey is access key for container in context
 	ContainerCtxKey = CtxKey("container")
 )

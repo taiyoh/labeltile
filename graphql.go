@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strconv"
 
 	"github.com/graphql-go/graphql"
 	"github.com/taiyoh/labeltile/app"
@@ -20,7 +19,7 @@ type GraphQL struct {
 }
 
 // NewGraphQLRequest returns Request object with json and token validation
-func NewGraphQLRequest(body io.ReadCloser, userToken string, serializer app.UserTokenSerializer) (*GraphQL, error) {
+func NewGraphQLRequest(body io.ReadCloser) (*GraphQL, error) {
 	r := &GraphQL{}
 	if err := json.NewDecoder(body).Decode(r); err != nil {
 		return nil, errors.New("broken request")
@@ -28,24 +27,10 @@ func NewGraphQLRequest(body io.ReadCloser, userToken string, serializer app.User
 	if r.Variables == nil || r.Query == "" {
 		return nil, errors.New("require query and variables")
 	}
-	if userToken == "" {
-		return r, nil
-	}
-
-	if claims, err := serializer.Deserialize(userToken); err == nil {
-		userID := claims["userID"].(string)
-		expDate := claims["expireDate"].(string)
-		ed, _ := strconv.ParseInt(expDate, 10, 64)
-		r.User = app.NewRequestUser(userID, ed)
-		return r, nil
-	}
-
-	return nil, errors.New("broken user token")
+	return r, nil
 }
 
-func (g *GraphQL) Run(container app.Container, ctx context.Context) interface{} {
-	ctx = context.WithValue(ctx, app.RequestUserCtxKey, g.User)
-	ctx = context.WithValue(ctx, app.ContainerCtxKey, container)
+func (g *GraphQL) Run(ctx context.Context) interface{} {
 	r := graphql.Do(graphql.Params{
 		Schema:         schema,
 		RequestString:  g.Query,
