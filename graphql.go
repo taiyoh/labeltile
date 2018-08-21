@@ -7,7 +7,6 @@ import (
 	"io"
 
 	"github.com/graphql-go/graphql"
-	"github.com/taiyoh/labeltile/app"
 	"github.com/taiyoh/labeltile/resolver"
 )
 
@@ -15,7 +14,6 @@ import (
 type GraphQL struct {
 	Variables map[string]interface{}
 	Query     string
-	User      app.RequestUser
 }
 
 // NewGraphQLRequest returns Request object with json and token validation
@@ -30,14 +28,21 @@ func NewGraphQLRequest(body io.ReadCloser) (*GraphQL, error) {
 	return r, nil
 }
 
-func (g *GraphQL) Run(ctx context.Context) interface{} {
+// Run provides GraphQL request with resolver
+func (g *GraphQL) Run(ctx context.Context) map[string]interface{} {
 	r := graphql.Do(graphql.Params{
 		Schema:         schema,
 		RequestString:  g.Query,
 		VariableValues: g.Variables,
 		Context:        ctx,
 	})
-	return r.Data
+	res := map[string]interface{}{
+		"data": r.Data,
+	}
+	if r.HasErrors() {
+		res["errors"] = r.Errors
+	}
+	return res
 }
 
 var (

@@ -2,11 +2,15 @@ package labeltile_test
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"io/ioutil"
 	"testing"
 
 	"github.com/taiyoh/labeltile"
+	"github.com/taiyoh/labeltile/app"
+	"github.com/taiyoh/labeltile/app/domain"
+	"github.com/taiyoh/labeltile/app/infra/mock"
 )
 
 func newReader(s string) io.ReadCloser {
@@ -35,4 +39,48 @@ func TestNewRequest(t *testing.T) {
 	if len(req.Variables) != 0 {
 		t.Error("something variable is in")
 	}
+}
+
+func TestRunGraphQLRequest(t *testing.T) {
+	reqStr := `{"variables": {}, "query": "query { operator { id mail } }"}`
+	req, _ := labeltile.NewGraphQLRequest(newReader(reqStr))
+
+	c := mock.LoadContainerImpl()
+	factory := domain.NewUserFactory(c.UserRepository())
+	u := factory.Build(domain.UserMail("foo@example.com"))
+	u = u.AddRole(domain.RoleEditor)
+	c.UserRepository().Save(u)
+
+	ctx := context.WithValue(context.Background(), app.ContainerCtxKey, c)
+
+	t.Run("not loggedin", func(t *testing.T) {
+		res := req.Run(ctx)
+		data := res["data"].(map[string]interface{})
+		op, ok := data["operator"]
+		if !ok {
+			t.Error("operator key not found")
+		}
+		if op != nil {
+			t.Error("operator data found")
+		}
+	})
+
+	t.Run("already loggedin", func(t *testing.T) {
+		res := req.Run(context.WithValue(ctx, app.UserIDCtxKey, string(u.ID)))
+		data := res["data"].(map[string]interface{})
+		op, ok := data["operator"].(map[string]interface{})
+		if !ok {
+			t.Error("operator key not found")
+		}
+		if v, exists := op["id"]; !exists || v.(string) != string(u.ID) {
+			t.Error("wrong id fetched:", v)
+		}
+		if v, exists := op["mail"]; !exists || v.(string) != string(u.Mail) {
+			t.Error("wrong mail fetched:", v)
+		}
+		if _, exists := op["roles"]; exists {
+			t.Error("unspecified field returns")
+		}
+	})
+
 }

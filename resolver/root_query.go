@@ -25,10 +25,10 @@ func rootQueryOperator(p graphql.ResolveParams) (interface{}, error) {
 	if !cok {
 		return nil, errors.New("container not found")
 	}
-	reqUser, rok := p.Context.Value(app.RequestUserCtxKey).(app.RequestUser)
+	userID, rok := p.Context.Value(app.UserIDCtxKey).(string)
 	if !rok {
-		return nil, errors.New("requestUser not found")
+		return nil, nil
 	}
-	u := app.UserFindService(reqUser.ID(), container)
+	u := app.UserFindService(userID, container)
 	return u, nil
 }
