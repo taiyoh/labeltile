@@ -1,30 +1,30 @@
 package resolver
 
 import (
-	"errors"
-
 	"github.com/graphql-go/graphql"
 	"github.com/taiyoh/labeltile/app"
 )
 
-func initRootQuery() {
+func initRootQuery(container app.Container) {
 	r := GetType(GQLType("RootQuery"))
+	rq := &RootQuery{container: container}
 	for _, f := range []*graphql.Field{
 		&graphql.Field{
 			Name:    "operator",
 			Type:    GetType(GQLType("User")),
-			Resolve: rootQueryOperator,
+			Resolve: rq.Operator,
 		},
 	} {
 		r.AddFieldConfig(f.Name, f)
 	}
 }
 
-func rootQueryOperator(p graphql.ResolveParams) (interface{}, error) {
-	container, cok := p.Context.Value(app.ContainerCtxKey).(app.Container)
-	if !cok {
-		return nil, errors.New("container not found")
-	}
+type RootQuery struct {
+	container app.Container
+}
+
+func (t *RootQuery) Operator(p graphql.ResolveParams) (interface{}, error) {
+	container := t.container
 	userID, rok := p.Context.Value(app.UserIDCtxKey).(string)
 	if !rok {
 		return nil, nil

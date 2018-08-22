@@ -28,8 +28,6 @@ type CtxKey string
 var (
 	// UserIDCtxKey is access key for requestUser in context
 	UserIDCtxKey = CtxKey("userID")
-	// ContainerCtxKey is access key for container in context
-	ContainerCtxKey = CtxKey("container")
 )
 
 // UserDTO is data transfer object for user domain

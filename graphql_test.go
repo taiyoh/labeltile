@@ -13,6 +13,15 @@ import (
 	"github.com/taiyoh/labeltile/app/infra/mock"
 )
 
+var (
+	container app.Container
+)
+
+func initGraphQLTest() {
+	container = mock.LoadContainer()
+	labeltile.InitializeSchema(container)
+}
+
 func newReader(s string) io.ReadCloser {
 	return ioutil.NopCloser(bytes.NewBufferString(s))
 }
@@ -45,13 +54,12 @@ func TestRunGraphQLRequest(t *testing.T) {
 	reqStr := `{"variables": {}, "query": "query { operator { id mail } }"}`
 	req, _ := labeltile.NewGraphQLRequest(newReader(reqStr))
 
-	c := mock.LoadContainer()
-	factory := domain.NewUserFactory(c.UserRepository())
+	factory := domain.NewUserFactory(container.UserRepository())
 	u := factory.Build(domain.UserMail("foo@example.com"))
 	u = u.AddRole(domain.RoleEditor)
-	c.UserRepository().Save(u)
+	container.UserRepository().Save(u)
 
-	ctx := context.WithValue(context.Background(), app.ContainerCtxKey, c)
+	ctx := context.Background()
 
 	t.Run("not loggedin", func(t *testing.T) {
 		res := req.Run(ctx)

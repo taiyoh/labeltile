@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"github.com/graphql-go/graphql"
+	"github.com/taiyoh/labeltile/app"
 )
 
 // GQLType is registered GraphQL object type
@@ -16,7 +17,7 @@ func GetType(t GQLType) *graphql.Object {
 }
 
 // InitializeTypes provides user definition GraphQL types initialization
-func InitializeTypes() {
+func InitializeTypes(container app.Container) {
 	types = map[GQLType]*graphql.Object{
 		GQLType("User"): buildType("User", []*graphql.Field{
 			&graphql.Field{Name: "id", Type: graphql.NewNonNull(graphql.ID)},
@@ -26,8 +27,8 @@ func InitializeTypes() {
 		GQLType("RootQuery"):    buildType("RootQuery", []*graphql.Field{}),
 		GQLType("RootMutation"): buildType("RootMutation", []*graphql.Field{}),
 	}
-	initRootQuery()
-	initRootMutation()
+	initRootQuery(container)
+	initRootMutation(container)
 }
 
 func buildType(name string, fieldList []*graphql.Field) *graphql.Object {

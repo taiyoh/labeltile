@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/graphql-go/graphql"
+	"github.com/taiyoh/labeltile/app"
 	"github.com/taiyoh/labeltile/resolver"
 )
 
@@ -49,8 +50,9 @@ var (
 	schema graphql.Schema
 )
 
-func init() {
-	resolver.InitializeTypes()
+// InitializeGraphQLSchema provides type initialization for GraphQL
+func InitializeGraphQLSchema(container app.Container) {
+	resolver.InitializeTypes(container)
 	schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 		Query: resolver.GetType(resolver.GQLType("RootQuery")),
 	})
