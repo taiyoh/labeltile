@@ -5,13 +5,13 @@ import (
 	"github.com/taiyoh/labeltile/app"
 )
 
-func initRootQuery(container app.Container) {
-	r := GetType(GQLType("RootQuery"))
+func (s *TypeStorage) InitRootQuery(container app.Container) {
+	r := s.Get(GQLType("RootQuery"))
 	rq := &RootQuery{container: container}
 	for _, f := range []*graphql.Field{
 		&graphql.Field{
 			Name:    "operator",
-			Type:    GetType(GQLType("User")),
+			Type:    s.Get(GQLType("User")),
 			Resolve: rq.Operator,
 		},
 	} {

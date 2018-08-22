@@ -5,13 +5,13 @@ import (
 	"github.com/taiyoh/labeltile/app"
 )
 
-func initRootMutation(container app.Container) {
-	m := GetType(GQLType("RootMutation"))
+func (s *TypeStorage) InitRootMutation(container app.Container) {
+	m := s.Get(GQLType("RootMutation"))
 	rm := &RootMutation{container: container}
 	for _, f := range []*graphql.Field{
 		&graphql.Field{
 			Name: "updateUser",
-			Type: GetType(GQLType("User")),
+			Type: s.Get(GQLType("User")),
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.ID)},
 			},

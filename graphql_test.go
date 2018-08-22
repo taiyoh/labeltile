@@ -13,32 +13,25 @@ import (
 	"github.com/taiyoh/labeltile/app/infra/mock"
 )
 
-var (
-	container app.Container
-)
-
-func initGraphQLTest() {
-	container = mock.LoadContainer()
-	labeltile.InitializeSchema(container)
-}
-
 func newReader(s string) io.ReadCloser {
 	return ioutil.NopCloser(bytes.NewBufferString(s))
 }
 
 func TestBrokenRequest(t *testing.T) {
-	if _, err := labeltile.NewGraphQLRequest(newReader(`{"foo":[}`)); err == nil {
+	s := labeltile.InitializeGraphQLSchema(mock.LoadContainer())
+	if _, err := labeltile.NewGraphQLRequest(s, newReader(`{"foo":[}`)); err == nil {
 		t.Error("broken request")
 	}
 
-	if _, err := labeltile.NewGraphQLRequest(newReader(`{"foo":"bar"}`)); err == nil {
+	if _, err := labeltile.NewGraphQLRequest(s, newReader(`{"foo":"bar"}`)); err == nil {
 		t.Error("requires query and variables")
 	}
 }
 
 func TestNewRequest(t *testing.T) {
+	s := labeltile.InitializeGraphQLSchema(mock.LoadContainer())
 	reqStr := `{"variables": {}, "query": "query { operator { id } }"}`
-	req, err := labeltile.NewGraphQLRequest(newReader(reqStr))
+	req, err := labeltile.NewGraphQLRequest(s, newReader(reqStr))
 	if err != nil {
 		t.Error("error found: " + err.Error())
 	}
@@ -51,13 +44,15 @@ func TestNewRequest(t *testing.T) {
 }
 
 func TestRunGraphQLRequest(t *testing.T) {
+	c := mock.LoadContainer()
+	s := labeltile.InitializeGraphQLSchema(c)
 	reqStr := `{"variables": {}, "query": "query { operator { id mail } }"}`
-	req, _ := labeltile.NewGraphQLRequest(newReader(reqStr))
+	req, _ := labeltile.NewGraphQLRequest(s, newReader(reqStr))
 
-	factory := domain.NewUserFactory(container.UserRepository())
+	factory := domain.NewUserFactory(c.UserRepository())
 	u := factory.Build(domain.UserMail("foo@example.com"))
 	u = u.AddRole(domain.RoleEditor)
-	container.UserRepository().Save(u)
+	c.UserRepository().Save(u)
 
 	ctx := context.Background()
 

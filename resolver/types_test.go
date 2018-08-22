@@ -9,14 +9,14 @@ import (
 
 func TestInitialize(t *testing.T) {
 	c := mock.LoadContainer()
-	resolver.InitializeTypes(c)
-	if o := resolver.GetType(resolver.GQLType("RootQuery")); o == nil {
+	s := resolver.InitializeTypes(c)
+	if o := s.Get(resolver.GQLType("RootQuery")); o == nil {
 		t.Error("RootQuery not initialized")
 	}
-	if o := resolver.GetType(resolver.GQLType("RootMutation")); o == nil {
+	if o := s.Get(resolver.GQLType("RootMutation")); o == nil {
 		t.Error("RootMutation not initialized")
 	}
-	if o := resolver.GetType(resolver.GQLType("User")); o == nil {
+	if o := s.Get(resolver.GQLType("User")); o == nil {
 		t.Error("User not initialized")
 	}
 }

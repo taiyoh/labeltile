@@ -15,11 +15,12 @@ import (
 type GraphQL struct {
 	Variables map[string]interface{}
 	Query     string
+	Schema    *graphql.Schema
 }
 
 // NewGraphQLRequest returns Request object with json and token validation
-func NewGraphQLRequest(body io.ReadCloser) (*GraphQL, error) {
-	r := &GraphQL{}
+func NewGraphQLRequest(schema *graphql.Schema, body io.ReadCloser) (*GraphQL, error) {
+	r := &GraphQL{Schema: schema}
 	if err := json.NewDecoder(body).Decode(r); err != nil {
 		return nil, errors.New("broken request")
 	}
@@ -32,7 +33,7 @@ func NewGraphQLRequest(body io.ReadCloser) (*GraphQL, error) {
 // Run provides GraphQL request with resolver
 func (g *GraphQL) Run(ctx context.Context) map[string]interface{} {
 	r := graphql.Do(graphql.Params{
-		Schema:         schema,
+		Schema:         *g.Schema,
 		RequestString:  g.Query,
 		VariableValues: g.Variables,
 		Context:        ctx,
@@ -46,14 +47,11 @@ func (g *GraphQL) Run(ctx context.Context) map[string]interface{} {
 	return res
 }
 
-var (
-	schema graphql.Schema
-)
-
 // InitializeGraphQLSchema provides type initialization for GraphQL
-func InitializeGraphQLSchema(container app.Container) {
-	resolver.InitializeTypes(container)
-	schema, _ = graphql.NewSchema(graphql.SchemaConfig{
-		Query: resolver.GetType(resolver.GQLType("RootQuery")),
+func InitializeGraphQLSchema(container app.Container) *graphql.Schema {
+	s := resolver.InitializeTypes(container)
+	schema, _ := graphql.NewSchema(graphql.SchemaConfig{
+		Query: s.Get(resolver.GQLType("RootQuery")),
 	})
+	return &schema
 }
