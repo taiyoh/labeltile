@@ -5,6 +5,7 @@ import (
 	"github.com/taiyoh/labeltile/app"
 )
 
+// InitRootMutation fills resolver fields in RootMutation type
 func (s *TypeStorage) InitRootMutation(container app.Container) {
 	m := s.Get(GQLType("RootMutation"))
 	rm := &RootMutation{container: container}
@@ -22,10 +23,12 @@ func (s *TypeStorage) InitRootMutation(container app.Container) {
 	}
 }
 
+// RootMutation is field resolver aggregation for RootMutation type
 type RootMutation struct {
 	container app.Container
 }
 
+// UpdateUser is implementation for "updateUser" field in RootMutation type
 func (t *RootMutation) UpdateUser(p graphql.ResolveParams) (interface{}, error) {
 	return nil, nil
 }

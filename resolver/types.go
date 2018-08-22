@@ -8,15 +8,18 @@ import (
 // GQLType is registered GraphQL object type
 type GQLType string
 
+// TypeStorage provides stores GraphQL type definitions
 type TypeStorage struct {
 	stores map[GQLType]*graphql.Object
 }
 
+// Get returns graphql.Object which matches by given name
 func (s *TypeStorage) Get(n GQLType) *graphql.Object {
 	o, _ := s.stores[n]
 	return o
 }
 
+// Register provides building graphql.Object and setting it
 func (s *TypeStorage) Register(name string, fieldList ...*graphql.Field) {
 	o := graphql.NewObject(graphql.ObjectConfig{
 		Name:   name,

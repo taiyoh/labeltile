@@ -5,6 +5,7 @@ import (
 	"github.com/taiyoh/labeltile/app"
 )
 
+// InitRootQuery fills resolver fields in RootQuery type
 func (s *TypeStorage) InitRootQuery(container app.Container) {
 	r := s.Get(GQLType("RootQuery"))
 	rq := &RootQuery{container: container}
@@ -19,10 +20,12 @@ func (s *TypeStorage) InitRootQuery(container app.Container) {
 	}
 }
 
+// RootQuery is field resolver aggregation for RootQuery type
 type RootQuery struct {
 	container app.Container
 }
 
+// Operator is implementation for "operator" field in RootQuery type
 func (t *RootQuery) Operator(p graphql.ResolveParams) (interface{}, error) {
 	container := t.container
 	userID, rok := p.Context.Value(app.UserIDCtxKey).(string)
