@@ -15,9 +15,9 @@ import (
 
 func TestTokenMiddleware(t *testing.T) {
 	router := gin.Default()
-	c := mock.LoadContainerImpl()
+	c := mock.LoadContainer()
 	s := infra.NewUserTokenSerializer("HS512", "foobar", 1)
-	c.SetSerializer(s)
+	c.Register("UserTokenSerializer", s)
 	router.Use(labeltile.UserTokenMiddleware(c))
 	router.GET("/", func(c *gin.Context) {
 		userID, _ := c.Get("userID")

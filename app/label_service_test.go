@@ -10,7 +10,7 @@ import (
 )
 
 func TestLabelAddService(t *testing.T) {
-	c := mock.LoadContainerImpl()
+	c := mock.LoadContainer()
 	ufactory := domain.NewUserFactory(c.UserRepository())
 	user := ufactory.Build(domain.UserMail("foo@example.com"))
 	user = user.AddRole(domain.RoleEditor)

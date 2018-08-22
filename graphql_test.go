@@ -45,7 +45,7 @@ func TestRunGraphQLRequest(t *testing.T) {
 	reqStr := `{"variables": {}, "query": "query { operator { id mail } }"}`
 	req, _ := labeltile.NewGraphQLRequest(newReader(reqStr))
 
-	c := mock.LoadContainerImpl()
+	c := mock.LoadContainer()
 	factory := domain.NewUserFactory(c.UserRepository())
 	u := factory.Build(domain.UserMail("foo@example.com"))
 	u = u.AddRole(domain.RoleEditor)

@@ -10,7 +10,7 @@ import (
 )
 
 func TestUserRegisterService(t *testing.T) {
-	c := mock.LoadContainerImpl()
+	c := mock.LoadContainer()
 	f := domain.NewUserFactory(c.UserRepository())
 	op := f.Build(domain.UserMail("foo@example.com"))
 	c.UserRepository().Save(op)
@@ -32,7 +32,7 @@ func TestUserRegisterService(t *testing.T) {
 }
 
 func TestUserFindService(t *testing.T) {
-	c := mock.LoadContainerImpl()
+	c := mock.LoadContainer()
 	f := domain.NewUserFactory(c.UserRepository())
 	op := f.Build(domain.UserMail("foo@example.com"))
 	op = op.AddRole(domain.RoleManageUser)
@@ -58,7 +58,7 @@ func TestUserFindService(t *testing.T) {
 }
 
 func TestUserAddAndDeleteRoleService(t *testing.T) {
-	c := mock.LoadContainerImpl()
+	c := mock.LoadContainer()
 	f := domain.NewUserFactory(c.UserRepository())
 	op := f.Build(domain.UserMail("foo@example.com"))
 	tgt := f.Build(domain.UserMail("bar@example.com"))
@@ -119,7 +119,7 @@ func TestUserAddAndDeleteRoleService(t *testing.T) {
 }
 
 func TestSelfRoleEdit(t *testing.T) {
-	c := mock.LoadContainerImpl()
+	c := mock.LoadContainer()
 
 	f := domain.NewUserFactory(c.UserRepository())
 	op := f.Build(domain.UserMail("foo@example.com"))
