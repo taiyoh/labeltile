@@ -4,6 +4,7 @@ import "github.com/taiyoh/labeltile/app/domain"
 
 // Container is interface for infra implementation
 type Container interface {
+	Register(string, interface{})
 	UserTokenSerializer() UserTokenSerializer
 	OAuth2Google() OAuth2Google
 	UserRepository() domain.UserRepository

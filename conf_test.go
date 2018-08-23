@@ -50,6 +50,19 @@ func TestValidConf(t *testing.T) {
 	}
 	defer os.RemoveAll(d)
 
+	f := filepath.Join(d, "valid.toml")
+	loadValidConfPath(f, templatePath())
+	if _, err := labeltile.NewConf(f); err != nil {
+		t.Error("valid section:", err)
+	}
+}
+
+func templatePath() string {
+	currentDir, _ := os.Getwd()
+	return filepath.Join(currentDir, "templates")
+}
+
+func loadValidConfPath(filePath, templateDir string) {
 	valid_conf_text := `
 [server]
 port=3000
@@ -69,11 +82,6 @@ redirect_url="https://example.com/auth/google/callback"
 
 	tmpl := template.Must(template.New("valid_conf").Parse(valid_conf_text))
 	bu := &bytes.Buffer{}
-	tmpl.Execute(bu, map[string]string{"template": strings.Replace(d, "\\", "\\\\", -1)})
-	f := filepath.Join(d, "valid.toml")
-	ioutil.WriteFile(f, bu.Bytes(), 0666)
-	if _, err := labeltile.NewConf(f); err != nil {
-		t.Error("valid section:", err)
-	}
-
+	tmpl.Execute(bu, map[string]string{"template": strings.Replace(templateDir, "\\", "\\\\", -1)})
+	ioutil.WriteFile(filePath, bu.Bytes(), 0666)
 }
