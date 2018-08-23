@@ -8,6 +8,8 @@ import (
 // GQLType is registered GraphQL object type
 type GQLType string
 
+type FieldResolverInitializer func(*TypeStorage, app.Container)
+
 // TypeStorage provides stores GraphQL type definitions
 type TypeStorage struct {
 	stores map[GQLType]*graphql.Object
@@ -31,6 +33,12 @@ func (s *TypeStorage) Register(name string, fieldList ...*graphql.Field) {
 	s.stores[GQLType(name)] = o
 }
 
+func (s *TypeStorage) SetupResolvers(c app.Container, fns ...FieldResolverInitializer) {
+	for _, fn := range fns {
+		fn(s, c)
+	}
+}
+
 // InitializeTypes provides user definition GraphQL types initialization
 func InitializeTypes(container app.Container) *TypeStorage {
 	s := &TypeStorage{stores: map[GQLType]*graphql.Object{}}
@@ -41,8 +49,11 @@ func InitializeTypes(container app.Container) *TypeStorage {
 	)
 	s.Register("RootQuery")
 	s.Register("RootMutation")
-	s.InitRootQuery(container)
-	s.InitRootMutation(container)
+	s.SetupResolvers(
+		container,
+		initRootQuery,
+		initRootMutation,
+	)
 
 	return s
 }

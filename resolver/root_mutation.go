@@ -5,8 +5,7 @@ import (
 	"github.com/taiyoh/labeltile/app"
 )
 
-// InitRootMutation fills resolver fields in RootMutation type
-func (s *TypeStorage) InitRootMutation(container app.Container) {
+func initRootMutation(s *TypeStorage, container app.Container) {
 	m := s.Get(GQLType("RootMutation"))
 	rm := &RootMutation{container: container}
 	for _, f := range []*graphql.Field{

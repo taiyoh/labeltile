@@ -5,8 +5,7 @@ import (
 	"github.com/taiyoh/labeltile/app"
 )
 
-// InitRootQuery fills resolver fields in RootQuery type
-func (s *TypeStorage) InitRootQuery(container app.Container) {
+func initRootQuery(s *TypeStorage, container app.Container) {
 	r := s.Get(GQLType("RootQuery"))
 	rq := &RootQuery{container: container}
 	for _, f := range []*graphql.Field{
