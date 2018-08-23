@@ -28,7 +28,7 @@ func NewLabeltile(conf *Conf, injectFns ...ContainerInjector) *Labeltile {
 	}
 	router := gin.Default()
 	router.LoadHTMLGlob(filepath.Join(conf.Server.Template, "*.tmpl"))
-	router.Use(UserTokenMiddleware(container))
+	router.Use(SetupUserTokenMiddleware(container))
 
 	return &Labeltile{
 		container: container,

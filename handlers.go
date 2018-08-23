@@ -48,6 +48,7 @@ func (h *GraphQLHandler) Run(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "bad Content-Type",
 		})
+		return
 	}
 	g, err = NewGraphQLRequest(h.schema, req.Body)
 	if err != nil {
