@@ -8,10 +8,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/taiyoh/labeltile/app/domain"
 
@@ -112,10 +110,9 @@ func TestGraphQLRequest(t *testing.T) {
 		buf := bytes.NewBufferString(`{"variables":{},"query":"query { operator { id } }"}`)
 		req, _ := http.NewRequest("POST", "/graphql", buf)
 		req.Header.Set("Content-Type", "application/json")
-		token, _ := c.UserTokenSerializer().Serialize(map[string]interface{}{
-			"userID":     string(user.ID),
-			"expireDate": strconv.FormatInt(time.Now().Add(time.Hour).Unix(), 10),
-		})
+		cl := c.UserTokenSerializer().NewClaims()
+		cl.UserID(string(user.ID))
+		token, _ := c.UserTokenSerializer().Serialize(cl)
 		req.Header.Set("Authorization", "Bearer "+token)
 		r.ServeHTTP(w, req)
 

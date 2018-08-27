@@ -11,15 +11,21 @@ type Container interface {
 	RoleRepository() *domain.RoleRepository
 }
 
+// UserTokenClaims is interface for user token claims
 type UserTokenClaims interface {
 	Claims() map[string]interface{}
+	FindUserID() string
+	UserID(string)
+	Expired() bool
 }
 
 // UserTokenSerializer is interface for user token serialization
 type UserTokenSerializer interface {
 	SecretKey() []byte
 	Serialize(UserTokenClaims) (string, error)
-	Deserialize(string) (map[string]interface{}, error)
+	Deserialize(string) (UserTokenClaims, error)
+	NewClaims() UserTokenClaims
+	RestoreClaims(map[string]interface{}) UserTokenClaims
 }
 
 // OAuth2Google is interface for oauth2 library using google provider

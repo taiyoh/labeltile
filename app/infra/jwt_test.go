@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/taiyoh/labeltile/app/infra"
 )
 
@@ -28,14 +27,15 @@ func TestSerialize(t *testing.T) {
 	if c, err := s.Deserialize(tokenString); err != nil {
 		t.Error("error found: " + err.Error())
 	} else {
-		if v, exists := c["iat"]; !exists {
+		claimData := c.Claims()
+		if v, exists := claimData["iat"]; !exists {
 			t.Error("not found 'iat' in deserialized claims")
 		} else if vs, ok := v.(string); !ok {
 			t.Error("'iat' is not string")
 		} else if vs != strconv.FormatInt(now.Unix(), 10) {
 			t.Error("'iat' value is wrong")
 		}
-		if v, exists := c["sub"]; !exists {
+		if v, exists := claimData["sub"]; !exists {
 			t.Error("not found 'sub' in deserialized claims")
 		} else if vs, ok := v.(string); !ok {
 			t.Error("'sub' is not string")
@@ -43,7 +43,7 @@ func TestSerialize(t *testing.T) {
 			t.Error("'sub' value is wrong")
 		}
 
-		if c["exp"].(string) != strconv.FormatInt(now.Add(time.Hour).Unix(), 10) {
+		if claimData["exp"].(string) != strconv.FormatInt(now.Add(time.Hour).Unix(), 10) {
 			t.Error("exp is wrong")
 		}
 	}
@@ -61,7 +61,7 @@ func TestExpiredDateToken(t *testing.T) {
 	innerClaims := claims.Claims()
 
 	innerClaims["exp"] = strconv.FormatInt(now.Unix(), 10)
-	claims = s.RestoreClaims(jwt.MapClaims(innerClaims))
+	claims = s.RestoreClaims(innerClaims)
 	tokenString, _ := s.Serialize(claims)
 
 	if _, err := s.Deserialize(tokenString); err == nil {
@@ -69,7 +69,7 @@ func TestExpiredDateToken(t *testing.T) {
 	}
 
 	innerClaims["exp"] = strconv.FormatInt(now.Add(-time.Hour).Unix(), 10)
-	claims = s.RestoreClaims(jwt.MapClaims(innerClaims))
+	claims = s.RestoreClaims(innerClaims)
 	tokenString, _ = s.Serialize(claims)
 
 	if _, err := s.Deserialize(tokenString); err == nil {
@@ -77,7 +77,7 @@ func TestExpiredDateToken(t *testing.T) {
 	}
 
 	delete(innerClaims, "exp")
-	claims = s.RestoreClaims(jwt.MapClaims(innerClaims))
+	claims = s.RestoreClaims(innerClaims)
 	if !claims.Expired() {
 		t.Error("claims is expired when exp key is not exists")
 	}

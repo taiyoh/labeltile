@@ -31,22 +31,8 @@ func TestTokenMiddleware(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		auths := strings.SplitN(w.Header().Get("Authorization"), " ", 2)
-		if len(auths) != 2 {
-			t.Error("wrong Authorization header")
-		}
-		if auths[0] != "Bearer" {
-			t.Error("Authorization header prefix is Bearer")
-		}
-		claims, err := s.Deserialize(auths[1])
-		if err != nil {
-			t.Error("deserialize failed:", err)
-		}
-		if _, ok := claims["userID"]; ok {
-			t.Error("ghost userID filled")
-		}
-		if len(claims) != 1 {
-			t.Error("expireDate key only")
+		if w.Header().Get("Authorization") != "" {
+			t.Error("unknown Authorization header returns")
 		}
 	})
 	t.Run("no Authorization header request to login", func(t *testing.T) {
@@ -58,11 +44,8 @@ func TestTokenMiddleware(t *testing.T) {
 		if err != nil {
 			t.Error("deserialize failed:", err)
 		}
-		id, userIDexists := claims["userID"]
-		if !userIDexists {
-			t.Error("userID not found")
-		}
-		if id.(string) != "foo" {
+		id := claims.FindUserID()
+		if id != "foo" {
 			t.Error("wrong userID")
 		}
 	})
@@ -72,24 +55,15 @@ func TestTokenMiddleware(t *testing.T) {
 		req.Header.Set("Authorization", "Bearer "+brokenJwt)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		auths := strings.SplitN(w.Header().Get("Authorization"), " ", 2)
-		if auths[1] == brokenJwt {
-			t.Error("broken JWT through")
-		}
-
-		claims, err := s.Deserialize(auths[1])
-		if err != nil {
-			t.Error("deserialize failed:", err)
-		}
-		if _, userIDexists := claims["userID"]; userIDexists {
-			t.Error("ghost userID found")
+		if w.Header().Get("Authorization") != "" {
+			t.Error("unknown Authorization header returns")
 		}
 	})
 	t.Run("valid Authorization header", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/", nil)
-		validJwt, _ := s.Serialize(map[string]interface{}{
-			"userID": "fuga",
-		})
+		cl := s.NewClaims()
+		cl.UserID("fuga")
+		validJwt, _ := s.Serialize(cl)
 		req.Header.Set("Authorization", "Bearer "+validJwt)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
@@ -99,7 +73,7 @@ func TestTokenMiddleware(t *testing.T) {
 		if err != nil {
 			t.Error("deserialize failed:", err)
 		}
-		if claims["userID"].(string) != "fuga" {
+		if claims.FindUserID() != cl.FindUserID() {
 			t.Error("wrong userID filled")
 		}
 	})

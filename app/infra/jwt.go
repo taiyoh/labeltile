@@ -24,7 +24,7 @@ type UserTokenClaims struct {
 }
 
 // NewClaims returns UserTokenClaims object
-func (s *UserTokenSerializer) NewClaims() *UserTokenClaims {
+func (s *UserTokenSerializer) NewClaims() app.UserTokenClaims {
 	now := time.Now()
 	return &UserTokenClaims{
 		claims: map[string]interface{}{
@@ -36,13 +36,8 @@ func (s *UserTokenSerializer) NewClaims() *UserTokenClaims {
 }
 
 // RestoreClaims returns UserTokenClaims object from Claims object
-func (s *UserTokenSerializer) RestoreClaims(cl interface{}) *UserTokenClaims {
-	claims := cl.(jwt.MapClaims)
-	c := map[string]interface{}{}
-	for k, v := range claims {
-		c[k] = v
-	}
-	return &UserTokenClaims{claims: c}
+func (s *UserTokenSerializer) RestoreClaims(claims map[string]interface{}) app.UserTokenClaims {
+	return &UserTokenClaims{claims: claims}
 }
 
 // Claims returns plain map object
@@ -50,9 +45,17 @@ func (c *UserTokenClaims) Claims() map[string]interface{} {
 	return c.claims
 }
 
-// UserID set user id to claims
+// UserID provides setting user id to claims
 func (c *UserTokenClaims) UserID(id string) {
 	c.claims["sub"] = id
+}
+
+// FindUserID returns user id from claims
+func (c *UserTokenClaims) FindUserID() string {
+	if id, ok := c.claims["sub"]; ok {
+		return id.(string)
+	}
+	return ""
 }
 
 // Expired returns whether this claims' expirenation is over or not
@@ -83,7 +86,7 @@ func (s *UserTokenSerializer) SecretKey() []byte {
 }
 
 // Deserialize returns plain claims from token
-func (s *UserTokenSerializer) Deserialize(tokenString string) (map[string]interface{}, error) {
+func (s *UserTokenSerializer) Deserialize(tokenString string) (app.UserTokenClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return s.SecretKey(), nil
 	})
@@ -92,12 +95,12 @@ func (s *UserTokenSerializer) Deserialize(tokenString string) (map[string]interf
 		return nil, errors.New("broken user token")
 	}
 
-	claims := s.RestoreClaims(token.Claims)
+	claims := s.RestoreClaims(map[string]interface{}(token.Claims.(jwt.MapClaims)))
 	if claims.Expired() {
 		return nil, errors.New("user token is expired")
 	}
 
-	return claims.Claims(), nil
+	return claims, nil
 }
 
 // Serialize returns token from plain claims
