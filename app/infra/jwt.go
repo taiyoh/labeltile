@@ -17,10 +17,49 @@ type UserTokenSerializer struct {
 	secretKey     string
 }
 
-func isExpired(claims jwt.MapClaims) bool {
-	d, ok := claims["expireDate"]
+// UserTokenClaims is wrapper for JWT Claims
+type UserTokenClaims struct {
+	app.UserTokenClaims
+	claims map[string]interface{}
+}
+
+// NewClaims returns UserTokenClaims object
+func (s *UserTokenSerializer) NewClaims() *UserTokenClaims {
+	now := time.Now()
+	return &UserTokenClaims{
+		claims: map[string]interface{}{
+			"iss": "labeltile",
+			"iat": strconv.FormatInt(now.Unix(), 10),
+			"exp": strconv.FormatInt(now.Add(time.Hour*time.Duration(s.expireHour)).Unix(), 10),
+		},
+	}
+}
+
+// RestoreClaims returns UserTokenClaims object from Claims object
+func (s *UserTokenSerializer) RestoreClaims(cl interface{}) *UserTokenClaims {
+	claims := cl.(jwt.MapClaims)
+	c := map[string]interface{}{}
+	for k, v := range claims {
+		c[k] = v
+	}
+	return &UserTokenClaims{claims: c}
+}
+
+// Claims returns plain map object
+func (c *UserTokenClaims) Claims() map[string]interface{} {
+	return c.claims
+}
+
+// UserID set user id to claims
+func (c *UserTokenClaims) UserID(id string) {
+	c.claims["sub"] = id
+}
+
+// Expired returns whether this claims' expirenation is over or not
+func (c *UserTokenClaims) Expired() bool {
+	d, ok := c.claims["exp"]
 	if !ok {
-		return false
+		return true
 	}
 	now := time.Now()
 	ds, _ := d.(string)
@@ -53,38 +92,19 @@ func (s *UserTokenSerializer) Deserialize(tokenString string) (map[string]interf
 		return nil, errors.New("broken user token")
 	}
 
-	var claims jwt.MapClaims
-	var ok bool
-	claims, ok = token.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, errors.New("broken user token")
-	}
-	if isExpired(claims) {
+	claims := s.RestoreClaims(token.Claims)
+	if claims.Expired() {
 		return nil, errors.New("user token is expired")
 	}
 
-	c := map[string]interface{}{}
-	for k, v := range claims {
-		c[k] = v
-	}
-
-	return c, nil
+	return claims.Claims(), nil
 }
 
 // Serialize returns token from plain claims
-func (s *UserTokenSerializer) Serialize(claims map[string]interface{}) (string, error) {
+func (s *UserTokenSerializer) Serialize(claims app.UserTokenClaims) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod(s.signingMethod))
 
-	c := jwt.MapClaims{}
-	for k, v := range claims {
-		c[k] = v
-	}
-	if _, exists := claims["expireDate"]; !exists {
-		t := time.Now().Add(time.Hour * time.Duration(s.expireHour))
-		c["expireDate"] = strconv.FormatInt(t.Unix(), 10)
-	}
-
-	token.Claims = c
+	token.Claims = jwt.MapClaims(claims.Claims())
 
 	tokenString, err := token.SignedString(s.SecretKey())
 	return tokenString, err

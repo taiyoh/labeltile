@@ -52,10 +52,7 @@ func (c *Container) UserRepository() domain.UserRepository {
 
 // RoleRepository is interface for fetching domain.RoleRepository from container stores
 func (c *Container) RoleRepository() *domain.RoleRepository {
-	o, ook := c.stores["RoleRepository"].(*domain.RoleRepository)
-	if !ook {
-		return nil
-	}
+	o, _ := c.stores["RoleRepository"].(*domain.RoleRepository)
 	return o
 }
 
