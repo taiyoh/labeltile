@@ -33,8 +33,17 @@ func TestTokenMiddleware(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		if w.Header().Get("Authorization") != "" {
-			t.Error("unknown Authorization header returns")
+		authHeader := w.Header().Get("Authorization")
+		if authHeader == "" {
+			t.Error("no Authorization header returns")
+		}
+		auths := strings.SplitN(authHeader, " ", 2)
+		claims, err := s.Deserialize(auths[1])
+		if err != nil {
+			t.Error("deserialize error found")
+		}
+		if id := claims.FindUserID(); id != "" {
+			t.Error("unknown user id found")
 		}
 	})
 	t.Run("no Authorization header request to login", func(t *testing.T) {
@@ -57,8 +66,13 @@ func TestTokenMiddleware(t *testing.T) {
 		req.Header.Set("Authorization", "Bearer "+brokenJwt)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
-		if w.Header().Get("Authorization") != "" {
-			t.Error("unknown Authorization header returns")
+		authHeader := w.Header().Get("Authorization")
+		if authHeader == "" {
+			t.Error("no Authorization header returns")
+		}
+		auths := strings.SplitN(authHeader, " ", 2)
+		if brokenJwt == auths[1] {
+			t.Error("broken jwt returns")
 		}
 	})
 	t.Run("valid Authorization header", func(t *testing.T) {
