@@ -41,6 +41,14 @@ func (c *Container) OAuth2Google() app.OAuth2Google {
 	return o
 }
 
+func (c *Container) SessionStorage() app.SessionStorage {
+	o, ook := c.stores["SessionStorage"].(app.SessionStorage)
+	if !ook {
+		return nil
+	}
+	return o
+}
+
 // UserRepository is interface for fetching domain.UserRepository from container stores
 func (c *Container) UserRepository() domain.UserRepository {
 	o, ook := c.stores["UserRepository"].(domain.UserRepository)

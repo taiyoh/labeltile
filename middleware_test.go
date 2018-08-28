@@ -1,12 +1,14 @@
 package labeltile_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/taiyoh/labeltile"
+	"github.com/taiyoh/labeltile/app"
 	"github.com/taiyoh/labeltile/app/infra"
 	"github.com/taiyoh/labeltile/app/infra/mock"
 
@@ -78,4 +80,77 @@ func TestTokenMiddleware(t *testing.T) {
 		}
 	})
 
+}
+
+func TestSessionMiddleware(t *testing.T) {
+	router := gin.Default()
+	c := mock.LoadContainer()
+	s := mock.LoadSession("foo", 3600)
+	c.Register("SessionStorage", s)
+
+	sessionID := ""
+
+	router.Use(
+		func(c *gin.Context) {
+			if sessionID != "" {
+				c.Set("sessionID", sessionID)
+			}
+			c.Next()
+		},
+		labeltile.SetupSessionMiddleware(c),
+	)
+	router.GET("/", func(c *gin.Context) {
+		if se, exists := c.Get("session"); exists {
+			session, _ := se.(app.SessionData)
+			session.Set("foo", []int{4423, 6061})
+		}
+		c.JSON(http.StatusOK, gin.H{"sessionID": sessionID})
+	})
+
+	t.Run("no session id assigned", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		res := &struct {
+			SessionID string `json:"sessionID"`
+		}{}
+		json.Unmarshal(w.Body.Bytes(), res)
+		if res.SessionID != "" {
+			t.Error("wrong session id assigned")
+		}
+	})
+	sessionID = "foobar"
+	t.Run("session id assigned", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		res := &struct {
+			SessionID string `json:"sessionID"`
+		}{}
+		json.Unmarshal(w.Body.Bytes(), res)
+		if res.SessionID != "foobar" {
+			t.Error("wrong session id assigned")
+		}
+		sessionData := s.Find("foobar")
+		if sessionData == nil {
+			t.Error("session not found")
+			return
+		}
+		d := sessionData.Get("foo")
+		if d == nil {
+			t.Error("session data not found")
+			return
+		}
+		ints, ok := d.([]int)
+		if !ok {
+			t.Error("stored 'foo' is wrong")
+			return
+		}
+		if len(ints) != 2 {
+			t.Error("contianed []int is wrong")
+		}
+		if ints[0] != 4423 || ints[1] != 6061 {
+			t.Error("contained []int is wrong")
+		}
+	})
 }

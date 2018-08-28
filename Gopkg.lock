@@ -37,6 +37,12 @@
   revision = "5a0f697c9ed9d68fef0116532c6e05cfeae00e55"
 
 [[projects]]
+  name = "github.com/google/uuid"
+  packages = ["."]
+  revision = "d460ce9f8df2e77fb1ba55ca87fafed96c607494"
+  version = "1.0.0"
+
+[[projects]]
   name = "github.com/graphql-go/graphql"
   packages = [".","gqlerrors","language/ast","language/kinds","language/lexer","language/location","language/parser","language/printer","language/source","language/typeInfo","language/visitor"]
   revision = "1e23489041ba90a66f317fe0deccb236a2fff3cb"
@@ -96,6 +102,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0b083431e3138482575a0614f583cc82874df7609788ecd641051e36d496b9d4"
+  inputs-digest = "cc93d4a18e19853bf99c719e44de2f5121d47adfbf6652b9d58020306780e447"
   solver-name = "gps-cdcl"
   solver-version = 1

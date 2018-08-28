@@ -17,6 +17,7 @@ type UserTokenClaims interface {
 	FindUserID() string
 	UserID(string)
 	Expired() bool
+	FindSessionID() string
 }
 
 // UserTokenSerializer is interface for user token serialization
@@ -31,6 +32,21 @@ type UserTokenSerializer interface {
 // OAuth2Google is interface for oauth2 library using google provider
 type OAuth2Google interface {
 	AuthCodeURL(state string) string
+}
+
+// SessionData is interface for session data storage interface for request
+type SessionData interface {
+	Get(string) interface{}
+	Set(string, interface{})
+	Remove(string) bool
+}
+
+// SessionStorage is interface for Session data operation
+type SessionStorage interface {
+	Find(string) SessionData
+	New(string) SessionData
+	Save(string, SessionData)
+	Remove(string) bool
 }
 
 // CtxKey is access key for context.Context

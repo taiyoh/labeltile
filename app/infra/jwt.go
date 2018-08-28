@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	"github.com/taiyoh/labeltile/app"
 )
 
@@ -31,6 +32,7 @@ func (s *UserTokenSerializer) NewClaims() app.UserTokenClaims {
 			"iss": "labeltile",
 			"iat": strconv.FormatInt(now.Unix(), 10),
 			"exp": strconv.FormatInt(now.Add(time.Hour*time.Duration(s.expireHour)).Unix(), 10),
+			"sid": uuid.New().String(),
 		},
 	}
 }
@@ -69,6 +71,12 @@ func (c *UserTokenClaims) Expired() bool {
 	dt, _ := strconv.Atoi(ds)
 	t := time.Unix(int64(dt), 0)
 	return now.Equal(t) || now.After(t)
+}
+
+// FindSessionID returns session id which is already created
+func (c *UserTokenClaims) FindSessionID() string {
+	sid, _ := c.claims["sid"].(string)
+	return sid
 }
 
 // NewUserTokenSerializer returns UserTokenSerializer object
