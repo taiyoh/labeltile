@@ -134,3 +134,32 @@ func UserFindService(id string, container interface {
 		Roles: roles,
 	}
 }
+
+// UserAuthorizeService provides authorized user registration by google
+func UserAuthorizeService(code string, container interface {
+	UserRepository() domain.UserRepository
+	RoleRepository() *domain.RoleRepository
+	OAuth2Google() OAuth2Google
+}) (*UserDTO, error) {
+	info, err := container.OAuth2Google().GetTokenInfo(code)
+	if err != nil {
+		return nil, err
+	}
+	repo := container.UserRepository()
+	email := info.Email()
+	user := repo.FindByMail(email)
+	if user == nil {
+		user = domain.NewUserFactory(repo).Build(domain.UserMail(email))
+	}
+	repo.Save(user)
+	roles := []string{}
+	for _, role := range container.RoleRepository().FindAll(user.Roles) {
+		roles = append(roles, role.Name)
+	}
+	resUser := &UserDTO{
+		ID:    string(user.ID),
+		Mail:  string(user.Mail),
+		Roles: roles,
+	}
+	return resUser, nil
+}

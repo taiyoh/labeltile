@@ -78,6 +78,14 @@ func (o *OAuth2Google) AuthCodeURL(state string) string {
 	return o.oauth2Conf.AuthCodeURL(state)
 }
 
+func NewUserTokenInfo(id, email string, exp time.Time) *OAuth2GoogleTokenInfo {
+	return &OAuth2GoogleTokenInfo{
+		userID:    id,
+		email:     email,
+		expiresAt: exp,
+	}
+}
+
 // GetTokenInfo returns OAuth2GoogleTokenInfo object using oauth2 protocol
 func (o *OAuth2Google) GetTokenInfo(code string) (app.OAuth2GoogleTokenInfo, error) {
 	ctx := context.Background()
@@ -104,11 +112,5 @@ func (o *OAuth2Google) GetTokenInfo(code string) (app.OAuth2GoogleTokenInfo, err
 		return nil, errors.New("broken json returns")
 	}
 
-	i := &OAuth2GoogleTokenInfo{
-		email:     resBody.Email,
-		userID:    resBody.ID,
-		expiresAt: t.Expiry,
-	}
-
-	return i, nil
+	return NewUserTokenInfo(resBody.ID, resBody.Email, t.Expiry), nil
 }

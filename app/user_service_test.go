@@ -1,8 +1,12 @@
 package app_test
 
 import (
+	"errors"
 	"strconv"
 	"testing"
+	"time"
+
+	"github.com/taiyoh/labeltile/app/infra"
 
 	"github.com/taiyoh/labeltile/app"
 	"github.com/taiyoh/labeltile/app/domain"
@@ -156,4 +160,31 @@ func TestSelfRoleEdit(t *testing.T) {
 	if op.Roles[1] != domain.RoleManageUser {
 		t.Error("second attached is Manager")
 	}
+}
+
+func TestUserAuthorizeService(t *testing.T) {
+	c := mock.LoadContainer()
+	o := mock.LoadOAuth2Google()
+	c.Register("OAuth2Google", o)
+
+	var userID string
+
+	o.FillResponse(nil, errors.New("hoge"))
+
+	if _, err := app.UserAuthorizeService("", c); err == nil {
+		t.Error("error should returns")
+	}
+
+	o.FillResponse(infra.NewUserTokenInfo("111", "foo@example.com", time.Now().Add(24*time.Hour)), nil)
+
+	if user, err := app.UserAuthorizeService("", c); err != nil {
+		t.Error("error should not returns")
+	} else {
+		userID = user.ID
+	}
+	user, _ := app.UserAuthorizeService("", c)
+	if user.ID != userID {
+		t.Error("same user id should returns")
+	}
+
 }
