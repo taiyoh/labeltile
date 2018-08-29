@@ -7,6 +7,11 @@ import (
 	"github.com/taiyoh/labeltile/app"
 )
 
+const (
+	// CtxSessionIDKey is for handling session id in Context
+	CtxSessionIDKey = "sessionID"
+)
+
 // UserTokenMiddleware provides framework's whole request filter using UserTokenSerializer
 type UserTokenMiddleware struct {
 	serializer app.UserTokenSerializer
@@ -18,7 +23,7 @@ func (m *UserTokenMiddleware) Execute(c *gin.Context) {
 	if id := claims.FindUserID(); id != "" {
 		c.Set("userID", id)
 	}
-	c.Set("sessionID", claims.FindSessionID())
+	c.Set(CtxSessionIDKey, claims.FindSessionID())
 	c.Next()
 	if id, ok := c.Get("userID"); ok {
 		claims.UserID(id.(string))
@@ -39,11 +44,7 @@ func (m *UserTokenMiddleware) captureClaims(header string) app.UserTokenClaims {
 
 func (m *UserTokenMiddleware) buildNewToken(claims app.UserTokenClaims) string {
 	token, _ := m.serializer.Serialize(claims)
-	authStr := []string{"Bearer"}
-	if token != "" {
-		authStr = append(authStr, token)
-	}
-	return strings.Join(authStr, " ")
+	return strings.Join([]string{"Bearer", token}, " ")
 }
 
 // SessionMiddleware provides framework's whole request filter using SessionStorage
@@ -53,7 +54,7 @@ type SessionMiddleware struct {
 
 // Execute provides wrapping request by SessionMiddleware
 func (m *SessionMiddleware) Execute(c *gin.Context) {
-	sessionID, exists := c.Get("sessionID")
+	sessionID, exists := c.Get(CtxSessionIDKey)
 	if !exists {
 		c.Next()
 		return
