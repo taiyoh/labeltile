@@ -99,7 +99,7 @@ func TestTokenMiddleware(t *testing.T) {
 func TestSessionMiddleware(t *testing.T) {
 	router := gin.Default()
 	c := mock.LoadContainer()
-	s := mock.LoadSession("foo", 3600)
+	s := infra.NewMemorySession("foo", 3600)
 	c.Register("SessionStorage", s)
 
 	sessionID := ""
