@@ -1,6 +1,10 @@
 package app
 
-import "github.com/taiyoh/labeltile/app/domain"
+import (
+	"time"
+
+	"github.com/taiyoh/labeltile/app/domain"
+)
 
 // Container is interface for infra implementation
 type Container interface {
@@ -31,7 +35,14 @@ type UserTokenSerializer interface {
 
 // OAuth2Google is interface for oauth2 library using google provider
 type OAuth2Google interface {
-	AuthCodeURL(state string) string
+	AuthCodeURL(string) string
+	GetTokenInfo(string) (OAuth2GoogleTokenInfo, error)
+}
+
+type OAuth2GoogleTokenInfo interface {
+	Email() string
+	ExpiresAt() time.Time
+	UserID() string
 }
 
 // SessionData is interface for session data storage interface for request
