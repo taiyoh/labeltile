@@ -60,12 +60,33 @@ type SessionStorage interface {
 	Remove(string) bool
 }
 
+type DatabaseMutateResult interface {
+	LastInsertId() (int64, error)
+	RowsAffected() (int64, error)
+}
+
+type DatabaseSelectResult map[string]string
+
+type DatabaseTransaction interface {
+	Select(string, []interface{}, error) (DatabaseSelectResult, error)
+	Mutate(string, []interface{}, error) (DatabaseMutateResult, error)
+	Commit()
+	Rollback()
+}
+
+type Database interface {
+	Close()
+	Select(string, []interface{}, error) ([]DatabaseSelectResult, error)
+	NewTransaction() DatabaseTransaction
+}
+
 // CtxKey is access key for context.Context
 type CtxKey string
 
 var (
 	// UserIDCtxKey is access key for requestUser in context
 	UserIDCtxKey = CtxKey("userID")
+	TxnCtxKey    = CtxKey("transaction")
 )
 
 // UserDTO is data transfer object for user domain
