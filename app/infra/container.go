@@ -18,9 +18,25 @@ func NewContainer() *Container {
 	return c
 }
 
+// Close provides closing process
+func (c *Container) Close() {
+	if d, ok := c.stores["Database"].(app.Database); ok {
+		d.Close()
+	}
+}
+
 // Register provides store given object by given name
 func (c *Container) Register(name string, obj interface{}) {
 	c.stores[name] = obj
+}
+
+// Database returns database object
+func (c *Container) Database() app.Database {
+	d, ok := c.stores["Database"].(app.Database)
+	if !ok {
+		return nil
+	}
+	return d
 }
 
 // UserTokenSerializer is interface for fetching app.UserTokenSerializer from container stores

@@ -9,18 +9,21 @@ import (
 	"github.com/taiyoh/labeltile/app"
 )
 
+// Database provides connection interface to database server
 type Database struct {
 	app.Database
 	db *sql.DB
 }
 
+// Transaction provides transaction manager for connection
 type Transaction struct {
 	app.DatabaseTransaction
 	committed bool
 	txn       *sql.Tx
 }
 
-func New(driver, dsn string) (*Database, error) {
+// New returns new database connection object
+func New(driver, dsn string) (app.Database, error) {
 	if driver != "sqlite" && driver != "mysql" {
 		return nil, errors.New("invalid driver")
 	}
@@ -31,10 +34,12 @@ func New(driver, dsn string) (*Database, error) {
 	return &Database{db: db}, nil
 }
 
+// Close provides closing process for database
 func (d *Database) Close() {
 	d.db.Close()
 }
 
+// Select provides selecting query to database
 func (d *Database) Select(query string, args []interface{}, err error) ([]app.DatabaseSelectResult, error) {
 	stmt, err := d.db.Prepare(query)
 	if err != nil {
@@ -66,11 +71,13 @@ func (d *Database) Select(query string, args []interface{}, err error) ([]app.Da
 	return results, nil
 }
 
-func (d *Database) NewTransaction() *Transaction {
+// NewTransaction returns new transaction manager object
+func (d *Database) NewTransaction() app.DatabaseTransaction {
 	txn, _ := d.db.Begin()
 	return &Transaction{txn: txn}
 }
 
+// Commit provides commit query to database server
 func (t *Transaction) Commit() {
 	if t.committed {
 		return
@@ -79,6 +86,7 @@ func (t *Transaction) Commit() {
 	t.committed = true
 }
 
+// Rollback provides rollback query to database server
 func (t *Transaction) Rollback() {
 	if t.committed {
 		return
@@ -86,10 +94,12 @@ func (t *Transaction) Rollback() {
 	t.txn.Rollback()
 }
 
+// Context returns context object with transaction object
 func (t *Transaction) Context() context.Context {
 	return context.WithValue(context.Background(), app.TxnCtxKey, t)
 }
 
+// Select provides selecting query in transaction
 func (t *Transaction) Select(query string, args []interface{}, err error) (app.DatabaseSelectResult, error) {
 	stmt, err := t.txn.Prepare(query)
 	if err != nil {
@@ -120,7 +130,11 @@ func (t *Transaction) Select(query string, args []interface{}, err error) (app.D
 	return row, nil
 }
 
+// Mutate provides create/update/delete query in this transaction
 func (t *Transaction) Mutate(query string, args []interface{}, err error) (app.DatabaseMutateResult, error) {
+	if err != nil {
+		return nil, err
+	}
 	stmt, err := t.txn.Prepare(query)
 	if err != nil {
 		return nil, err

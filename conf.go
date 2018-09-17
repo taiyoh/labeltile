@@ -65,11 +65,17 @@ type OAuth2Conf struct {
 	Google OAuth2GoogleConf `toml:"google"`
 }
 
+type Database struct {
+	Driver string `toml:"driver"`
+	Dsn    string `toml:"dsn"`
+}
+
 // Conf is configuration binder
 type Conf struct {
-	Server ServerConf `toml:"server"`
-	JWT    JWTConf    `toml:"jwt"`
-	OAuth2 OAuth2Conf `toml:"oauth2"`
+	Server   ServerConf `toml:"server"`
+	JWT      JWTConf    `toml:"jwt"`
+	OAuth2   OAuth2Conf `toml:"oauth2"`
+	Database Database   `toml:"database"`
 }
 
 // NewConf returns Conf object with validation

@@ -9,6 +9,7 @@ import (
 // Container is interface for infra implementation
 type Container interface {
 	Register(string, interface{})
+	Close()
 	UserTokenSerializer() UserTokenSerializer
 	OAuth2Google() OAuth2Google
 	UserRepository() domain.UserRepository

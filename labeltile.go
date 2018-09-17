@@ -39,6 +39,10 @@ func NewLabeltile(conf *Conf, injectFns ...ContainerInjector) *Labeltile {
 	}
 }
 
+func (l *Labeltile) Close() {
+	l.container.Close()
+}
+
 // SetupRoutes provides filling routing in gin framework
 func (l *Labeltile) SetupRoutes(injectFns ...RouteInjector) {
 	for _, fn := range injectFns {
